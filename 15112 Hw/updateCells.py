@@ -33,6 +33,10 @@ def appStarted(app):
     app.canFruit = True
     app.canSteel = True
     app.canTool = True
+    app.canIron = False
+    app.canGold = False
+    app.canDiamond = False
+    app.canCoal = False
     app.lakeRowsAndCols = []
 
     app.time = 0
@@ -59,25 +63,32 @@ def mousePressed(app, event):
     elif app.drawLine: # we are in the mode of adding elements to the board
         coords = (get3DPointsAroundPoint(app, event.x, event.y)) 
         timeCreated = app.time
-        if app.mode == "r":
+        if app.mode == "r": #rock
             element = worldElements.Rock(coords, timeCreated)
-        elif app.mode == 'p':
+        elif app.mode == 'p': #plant
             element = worldElements.Plant(coords, timeCreated)
-        elif  app.mode == 'd':
+        elif  app.mode == 'd': #dirt
             element = worldElements.Dirt(coords, timeCreated)
-        elif  app.mode == 't':
+        elif  app.mode == 't': #tree
             element = worldElements.Tree(coords, timeCreated)
-        elif  app.mode == 's':
+        elif  app.mode == 's': #seed
             element = worldElements.Seed(coords, timeCreated)
-        elif  app.mode == 'f':
+        elif  app.mode == 'f': #flower
             element = worldElements.Flower(coords, timeCreated)
-        elif  app.mode == 'o':
+        elif  app.mode == 'o': #fruit
             element = worldElements.Fruit(coords, timeCreated)
-        elif app.mode == 'm':
+        elif app.mode == 'm': #steel
             element = worldElements.Steel(coords, timeCreated)
-        elif app.mode == '1':
+        elif app.mode == '0': #iron
             element = worldElements.Tool(coords, timeCreated)
-
+        elif app.mode == '1': #iron
+            element = worldElements.Iron(coords, timeCreated)
+        elif app.mode == '2': #coal
+            element = worldElements.Coal(coords, timeCreated)
+        elif app.mode == '3': #diamond
+            element = worldElements.Diamond(coords, timeCreated)
+        elif app.mode == '4': #gold
+            element = worldElements.Gold(coords, timeCreated)
         app.worldElementList.append(element)      
 
 #if they press g, generate 2d line based off of the diffusing board middle row
@@ -124,11 +135,31 @@ def keyPressed(app, event):
             print("Steel isn't in the recipe book! Brush up on pre historic living!")
         else:
             app.mode = "m"
-    elif event.key == "1":
-        if not app.canSteel:
+    elif event.key == "0":
+        if not app.canTool:
             print("I will be generous and tell you tool = steel + ...")
         else:
+            app.mode = "0"
+    elif event.key == "1":
+        if not app.canIron:
+            print("It's mine time!")
+        else:
             app.mode = "1"
+    elif event.key == "2":
+        if not app.canCoal:
+            print("It's mine time!")
+        else:
+            app.mode = "2"
+    elif event.key == "3":
+        if not app.canDiamond:
+            print("It's mine time!")
+        else:
+            app.mode = "3"
+    elif event.key == "4":
+        if not app.canGold:
+            print("It's mine time!")
+        else:
+            app.mode = "4"
 
 #let the cells diffuse
 def updateCells(app):

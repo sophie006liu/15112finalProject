@@ -152,46 +152,47 @@ class Tool(worldElement):
         canvas.create_rectangle(baseX-5, baseY-2, baseX+5, baseY+2, fill = "SlateBlue2")
     
     def checkSurrounding(self, app):
-        '''
-        for element in app.worldElementList:
-            if isinstance(element, Rock): 
-                for rockPoint in element.coords:
-                    if rockPoint in self.coords:  
-                        num = random.randrange(1, 20, 1)
-                        ore = None
-                        if num >= 1 and num < 18:
-                            ore = Iron(element.coords, app.time)
-                        elif num == 18:
-                            ore = Diamond(element.coords, app.time)
-                        elif num ==19:
-                            ore = Gold(element.coords, app.time)
-                        app.worldElementList.remove(element) 
-                        if ore == None:
-                            print("did not generate ore, ", num)
-                        app.worldElementList.append(ore)
-                        oreCount = 0
-                        for element in app.worldElementList:
-                            if isinstance(element, Iron) or isinstance(element, Diamond) or isinstance(element, Gold):
-                                oreCount += 1
-                    break
-            '''
         for element in app.worldElementList:
             if isinstance(element, Rock): 
                 for rockPoint in element.coords:
                     if rockPoint in self.coords: 
                         num = random.randrange(1, 20, 1)
                         ore = None
-                        if num >= 1 and num < 18:
+                        if num >= 1 and num < 10:
                             ore = Iron(element.coords, app.time)
+                            app.canIron = True
+                        elif num >= 10 and num < 18:
+                            ore = Coal(element.coords, app.time)
+                            app.canCoal = True
                         elif num == 18:
                             ore = Diamond(element.coords, app.time)
+                            app.canDiamond = True
                         elif num ==19:
                             ore = Gold(element.coords, app.time)
+                            app.canGold = True
                         app.worldElementList.remove(element) 
                         if ore == None:
                             print("did not generate ore, ", num)
                         app.worldElementList.append(ore)
                         break
+class Coal(worldElement):
+    def __init__(self, coords, time):
+        super().__init__(coords, time)
+        
+    def drawElement(self, canvas, app):
+        pt1R, pt1C = self.coords[0]
+        pt2R, pt2C = self.coords[1]
+        pt3R, pt3C = self.coords[2]
+        pt4R, pt4C = self.coords[3]
+
+        pt1 = app.threeDPoints[pt1R][pt1C]
+        pt2 = app.threeDPoints[pt2R][pt2C]
+        pt3 = app.threeDPoints[pt3R][pt3C]
+        pt4 = app.threeDPoints[pt4R][pt4C]
+
+        #get the center point first
+        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_oval(baseX-3, baseY-2, baseX+3, baseY+2, fill = "black")
 
 class Iron(worldElement):
     def __init__(self, coords, time):
