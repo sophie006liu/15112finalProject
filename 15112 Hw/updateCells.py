@@ -26,13 +26,13 @@ def appStarted(app):
     app.worldElementList = []
 
     app.mode = "r"
-    app.canDirt = False
-    app.canTree = False
-    app.canSeed = False
-    app.canFlower = False
-    app.canFruit = False
-    app.canSteel = False
-    app.canTool = False
+    app.canDirt = True
+    app.canTree = True
+    app.canSeed = True
+    app.canFlower = True
+    app.canFruit = True
+    app.canSteel = True
+    app.canTool = True
     app.lakeRowsAndCols = []
 
     app.time = 0
