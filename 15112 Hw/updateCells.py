@@ -33,10 +33,11 @@ def appStarted(app):
     app.canFruit = True
     app.canSteel = True
     app.canTool = True
-    app.canIron = False
-    app.canGold = False
-    app.canDiamond = False
-    app.canCoal = False
+    app.canIron = True
+    app.canGold = True
+    app.canDiamond = True
+    app.canCoal = True
+    app.canLantern = False
     app.lakeRowsAndCols = []
 
     app.time = 0
@@ -89,6 +90,8 @@ def mousePressed(app, event):
             element = worldElements.Diamond(coords, timeCreated)
         elif app.mode == '4': #gold
             element = worldElements.Gold(coords, timeCreated)
+        elif app.mode == '5': #lantern
+            element = worldElements.Lantern(coords, timeCreated)
         app.worldElementList.append(element)      
 
 #if they press g, generate 2d line based off of the diffusing board middle row
@@ -160,7 +163,11 @@ def keyPressed(app, event):
             print("It's mine time!")
         else:
             app.mode = "4"
-
+    elif event.key == "5":
+        if not app.canGold:
+            print("First mine, then coal + iron")
+        else:
+            app.mode = "5"
 #let the cells diffuse
 def updateCells(app):
     newBoardA = make2dList(app.rows, app.cols)  
@@ -248,8 +255,8 @@ def updateCells(app):
                     downLeft + upLeft        
 
             ogA = app.boardA[row][col]   
-            newBoardA[row][col] = newNeighbor # + ogA - (app.dA * ogA) + \
-                #((1 - ogA) * app.f) - reproduceChange  
+            newBoardA[row][col] = newNeighbor 
+
     app.boardA = newBoardA    
 
 #setting up the diffuse board dimensions
