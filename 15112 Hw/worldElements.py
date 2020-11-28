@@ -152,6 +152,7 @@ class Tool(worldElement):
         canvas.create_rectangle(baseX-5, baseY-2, baseX+5, baseY+2, fill = "SlateBlue2")
     
     def checkSurrounding(self, app):
+        '''
         for element in app.worldElementList:
             if isinstance(element, Rock): 
                 for rockPoint in element.coords:
@@ -173,6 +174,24 @@ class Tool(worldElement):
                             if isinstance(element, Iron) or isinstance(element, Diamond) or isinstance(element, Gold):
                                 oreCount += 1
                     break
+            '''
+        for element in app.worldElementList:
+            if isinstance(element, Rock): 
+                for rockPoint in element.coords:
+                    if rockPoint in self.coords: 
+                        num = random.randrange(1, 20, 1)
+                        ore = None
+                        if num >= 1 and num < 18:
+                            ore = Iron(element.coords, app.time)
+                        elif num == 18:
+                            ore = Diamond(element.coords, app.time)
+                        elif num ==19:
+                            ore = Gold(element.coords, app.time)
+                        app.worldElementList.remove(element) 
+                        if ore == None:
+                            print("did not generate ore, ", num)
+                        app.worldElementList.append(ore)
+                        break
 
 class Iron(worldElement):
     def __init__(self, coords, time):
