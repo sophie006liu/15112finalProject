@@ -91,6 +91,8 @@ def mousePressed(app, event):
             element = worldElements.Fruit(coords, timeCreated)
         elif app.mode == 'm':
             element = worldElements.Steel(coords, timeCreated)
+        elif app.mode == '1':
+            element = worldElements.Tool(coords, timeCreated)
 
         app.worldElementList.append(element)      
 
@@ -138,6 +140,11 @@ def keyPressed(app, event):
             print("Steel isn't in the recipe book! Brush up on pre historic living!")
         else:
             app.mode = "m"
+    elif event.key == "1":
+        if not app.canSteel:
+            print("I will be generous and tell you tool = steel + ...")
+        else:
+            app.mode = "1"
 
 #let the cells diffuse
 def updateCells(app):
