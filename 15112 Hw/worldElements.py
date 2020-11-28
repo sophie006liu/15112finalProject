@@ -156,36 +156,6 @@ class Plant(worldElement):
         super().__init__(coords, time)
         self.length = 10 #change to random later
         self.color = "green"
-    '''
-    def drawElement(self, canvas, app):
-        pt1R, pt1C = self.coords[0]
-        pt2R, pt2C = self.coords[1]
-        pt3R, pt3C = self.coords[2]
-        pt4R, pt4C = self.coords[3]
-
-        pt1 = [pt1R, pt1C, app.boardA[pt1R][pt1C]]
-        pt2 = [pt2R, pt1C, app.boardA[pt2R][pt2C]]
-        pt3 = [pt3R, pt3C, app.boardA[pt3R][pt3C]]
-        pt4 = [pt4R, pt4C, app.boardA[pt4R][pt4C]]
-        print(pt1, pt2, pt3, pt4)
-        #this is the actual 3D points
-        p1, p2 = projectionOperations.orthogonalVector(pt1, pt2, pt3, pt4, self.length)
-
-        #translate to 2D
-        x2, y2 = projectionOperations.pointTransformer(pt1)
-        x1, y1 = projectionOperations.pointTransformer(pt2)
-
-        canvas.create_line(x1, y1, x2, y2)
-    
-    def checkSurrounding(self, app):
-        for element in app.worldElements:
-            if isinstance(element, Rock):
-                for point in coords:
-                    if point in self.coord
-                    dirt = Dirt(self.coords)
-                    app.worldElementList.append(dirt)
-                    app.canDirt = True
-    '''
 
     def drawElement(self, canvas, app):
         pt1R, pt1C = self.coords[0]
