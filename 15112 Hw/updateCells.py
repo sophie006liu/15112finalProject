@@ -40,22 +40,6 @@ def appStarted(app):
 def make2dList(rows, cols):
         return [([0] * cols) for row in range(rows)]
 
-def print2dList(a):
-    if (a == []):
-        # So we don't crash accessing a[0]
-        print([])
-        return
-    rows, cols = len(a), len(a[0])
-    fieldWidth = maxItemLength(a)
-    print('[')
-    for row in range(rows):
-        print(' [ ', end='')
-        for col in range(cols):
-            if (col > 0): print(', ', end='')
-            print(str(a[row][col]).rjust(fieldWidth), end='')
-        print(' ]')
-    print(']')
-
 def maxItemLength(a):
     maxLen = 0
     rows = len(a)

@@ -195,7 +195,31 @@ class Plant(worldElement):
         for lakeCoords in app.lakeRowsAndCols:
             if lakeCoords in self.coords:
                 self.color = "light sea green"
+        
+    def checkTime(self, app): 
+        if (app.time - self.timeCreated > 2) and self.color == "light sea green" and app.canTool: 
+            fish = Fish(self.coords, app.time)
+            app.worldElementList.append(fish)
 
+class Fish(worldElement):
+    def __init__(self, coords, time):
+        super().__init__(coords, time)
+       
+    def drawElement(self, canvas, app):
+        pt1R, pt1C = self.coords[0]
+        pt2R, pt2C = self.coords[1]
+        pt3R, pt3C = self.coords[2]
+        pt4R, pt4C = self.coords[3]
+
+        pt1 = app.threeDPoints[pt1R][pt1C]
+        pt2 = app.threeDPoints[pt2R][pt2C]
+        pt3 = app.threeDPoints[pt3R][pt3C]
+        pt4 = app.threeDPoints[pt4R][pt4C]
+
+        #get the center point first
+        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_rectangle(baseX-5, baseY-2, baseX+5, baseY+2, fill = "salmon")
+    
 class Dirt(worldElement):
     def __init__(self, coords, time):
         super().__init__(coords, time)
