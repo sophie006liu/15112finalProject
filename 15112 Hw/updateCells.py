@@ -32,6 +32,7 @@ def appStarted(app):
     app.canFlower = False
     app.canFruit = False
     app.canSteel = False
+    app.canTool = False
     app.lakeRowsAndCols = []
 
     app.time = 0
