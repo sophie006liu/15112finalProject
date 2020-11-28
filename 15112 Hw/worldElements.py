@@ -57,7 +57,40 @@ class Rock(worldElement):
                 app.worldElementList.append(dirt)
                 app.canDirt = True
                 break
+        nearbyTrees = set()
+        for element in app.worldElementList:
+            if isinstance(element, Tree):
+                for treePoint in element.coords:
+                    if treePoint in self.coords and element not in nearbyTrees:
+                        nearbyTrees.add(element)
+                        break
+        nearbyTrees = list(nearbyTrees)
+        if len(nearbyTrees)>=2:
+            for i in range(2):
+                app.worldElementList.remove(nearbyTrees[i])
+            fire = Fire(self.coords, app.time)
+            app.worldElementList.append(fire)
 
+class Fire(worldElement):
+    def __init__(self, coords, time):
+        super().__init__(coords, time)
+        
+    def drawElement(self, canvas, app):
+        pt1R, pt1C = self.coords[0]
+        pt2R, pt2C = self.coords[1]
+        pt3R, pt3C = self.coords[2]
+        pt4R, pt4C = self.coords[3]
+
+        pt1 = app.threeDPoints[pt1R][pt1C]
+        pt2 = app.threeDPoints[pt2R][pt2C]
+        pt3 = app.threeDPoints[pt3R][pt3C]
+        pt4 = app.threeDPoints[pt4R][pt4C]
+
+        #get the center point first
+        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_rectangle(baseX-5, baseY-2, baseX+5, baseY+2, fill = "red")
+
+    
 class Plant(worldElement): 
     def __init__(self, coords, time):
         super().__init__(coords, time)
@@ -291,13 +324,14 @@ class Seed(worldElement):
         if (app.time - self.timeCreated > 2) and self.inGarden: 
             flower = Flower(self.coords, app.time, True)   
             app.worldElementList.append(flower)
+            app.canFlower = True
             app.worldElementList.remove(self)
     
              
 class Flower(worldElement):
-    def __init__(self, coords, time, gardenStatus):
+    def __init__(self, coords, time, inGardenStatus = False):
         super().__init__(coords, time)
-        self.inGarden = gardenStatus
+        self.inGarden = inGardenStatus
         
     def drawElement(self, canvas, app):
         pt1R, pt1C = self.coords[0]
@@ -318,10 +352,11 @@ class Flower(worldElement):
         if (app.time - self.timeCreated > 2) and self.inGarden: 
             fruit = Fruit(self.coords, app.time, True)   
             app.worldElementList.append(fruit)
+            app.canFruit = True
             app.worldElementList.remove(self)
 
 class Fruit(worldElement):
-    def __init__(self, coords, time, inGardenStatus):
+    def __init__(self, coords, time, inGardenStatus = False):
         super().__init__(coords, time)
         self.inGarden = inGardenStatus
         

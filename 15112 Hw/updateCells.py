@@ -29,7 +29,8 @@ def appStarted(app):
     app.canDirt = False
     app.canTree = False
     app.canSeed = False
-
+    app.canFlower = False
+    app.canFruit = False
     app.lakeRowsAndCols = []
 
     app.time = 0
@@ -82,7 +83,10 @@ def mousePressed(app, event):
             element = worldElements.Tree(coords, timeCreated)
         elif  app.mode == 's':
             element = worldElements.Seed(coords, timeCreated)
-
+        elif  app.mode == 'f':
+            element = worldElements.Flower(coords, timeCreated)
+        elif  app.mode == 'o':
+            element = worldElements.Fruit(coords, timeCreated)
         app.worldElementList.append(element)      
 
 #if they press g, generate 2d line based off of the diffusing board middle row
@@ -105,11 +109,24 @@ def keyPressed(app, event):
             print("Trees isn't in the recipe book! How are trees grown?")
         else:
             app.mode = "t"
+
     elif event.key == "s":
         if not app.canSeed:
             print("Seeds isn't in the recipe book! Get creative lmao")
         else:
             app.mode = "s"
+
+    elif event.key == "f":
+        if not app.canSeed:
+            print("Flowers isn't in the recipe book! How are flowers grown?")
+        else:
+            app.mode = "f"
+
+    elif event.key == "o":
+        if not app.canSeed:
+            print("Fruit isn't in the recipe book! Think about your biology class?")
+        else:
+            app.mode = "o"
 
 #let the cells diffuse
 def updateCells(app):
