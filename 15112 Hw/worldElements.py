@@ -123,9 +123,7 @@ class Plant(worldElement):
             if isinstance(element, Rock):
                 for rockPoint in element.coords:
                     if rockPoint in self.coords:
-                        print("before", app.worldElementList)
                         app.worldElementList.remove(self)
-                        print("after", app.worldElementList)
                         seed = Seed(self.coords, app.time)
                         app.worldElementList.append(seed)
                         app.canSeed = True
@@ -167,10 +165,8 @@ class Dirt(worldElement):
         nearbySeeds = list(nearbySeeds)
         if len(nearbySeeds)>=2:
             for i in range(2):
-                print("removing: ", i)
                 app.worldElementList.remove(nearbySeeds[i])
             seed = Seed(self.coords, app.time, True)
-            print("dirt trying to append: ", seed)
             app.worldElementList.append(seed)
                         
 class Tree(worldElement):
@@ -196,7 +192,6 @@ class Tree(worldElement):
     def checkTime(self, app): 
         if (app.time - self.timeCreated > 2) and not self.spawnedAnimal:
             num = random.randrange(1, 4, 1)
-            print("spawning animal....")
             animal = None
             if num == 1:
                 animal = Rabbit(self.coords, app.time)
@@ -212,7 +207,6 @@ class Rabbit(worldElement):
         super().__init__(coords, time)
        
     def drawElement(self, canvas, app):
-        print("drawing rabbit")
         pt1R, pt1C = self.coords[0]
         pt2R, pt2C = self.coords[1]
         pt3R, pt3C = self.coords[2]
@@ -234,7 +228,6 @@ class Bird(worldElement):
         super().__init__(coords, time)
        
     def drawElement(self, canvas, app):
-        print("drawing bird")
         pt1R, pt1C = self.coords[0]
         pt2R, pt2C = self.coords[1]
         pt3R, pt3C = self.coords[2]
@@ -256,7 +249,6 @@ class Cow(worldElement):
         super().__init__(coords, time)
        
     def drawElement(self, canvas, app):
-        print("drawing cow")
         pt1R, pt1C = self.coords[0]
         pt2R, pt2C = self.coords[1]
         pt3R, pt3C = self.coords[2]
@@ -277,7 +269,6 @@ class Seed(worldElement):
         self.inGarden = gardenStatus
         
     def drawElement(self, canvas, app):
-        print("drawing seed")
         pt1R, pt1C = self.coords[0]
         pt2R, pt2C = self.coords[1]
         pt3R, pt3C = self.coords[2]
@@ -295,17 +286,18 @@ class Seed(worldElement):
         canvas.create_oval(base2X-2, base2Y-2, base2X+2, base2Y+2, fill = "tomato2")
         base3X, base3Y = baseX+1, baseY+1
         canvas.create_oval(base2X-2, base2Y-2, base2X+2, base2Y+2, fill = "OrangeRed3")
-    '''
+    
     def checkTime(self, app): 
         if (app.time - self.timeCreated > 2) and self.inGarden: 
-            flower = Flower(self.coords, app.time)   
+            flower = Flower(self.coords, app.time, True)   
             app.worldElementList.append(flower)
             app.worldElementList.remove(self)
-    '''
+    
              
 class Flower(worldElement):
-    def __init__(self, coords, time):
+    def __init__(self, coords, time, gardenStatus):
         super().__init__(coords, time)
+        self.inGarden = gardenStatus
         
     def drawElement(self, canvas, app):
         pt1R, pt1C = self.coords[0]
@@ -322,4 +314,29 @@ class Flower(worldElement):
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_oval(baseX-5, baseY-5, baseX+5, baseY+5, fill = "gold")
 
-   
+    def checkTime(self, app): 
+        if (app.time - self.timeCreated > 2) and self.inGarden: 
+            fruit = Fruit(self.coords, app.time, True)   
+            app.worldElementList.append(fruit)
+            app.worldElementList.remove(self)
+
+class Fruit(worldElement):
+    def __init__(self, coords, time, inGardenStatus):
+        super().__init__(coords, time)
+        self.inGarden = inGardenStatus
+        
+    def drawElement(self, canvas, app):
+        pt1R, pt1C = self.coords[0]
+        pt2R, pt2C = self.coords[1]
+        pt3R, pt3C = self.coords[2]
+        pt4R, pt4C = self.coords[3]
+
+        pt1 = app.threeDPoints[pt1R][pt1C]
+        pt2 = app.threeDPoints[pt2R][pt2C]
+        pt3 = app.threeDPoints[pt3R][pt3C]
+        pt4 = app.threeDPoints[pt4R][pt4C]
+
+        #get the center point first
+        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_oval(baseX-5, baseY-5, baseX+5, baseY+5, fill = "orchid1")
+
