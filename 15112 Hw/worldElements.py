@@ -8,7 +8,6 @@ class worldElement(object):
     def __init__(self, coords, time):
         self.coords = coords
         self.timeCreated = time
-        self.exists = True
     
     def drawElement(self, canvas, app):
         pt1R, pt1C = self.coords[0]
@@ -53,10 +52,11 @@ class Rock(worldElement):
     def checkSurrounding(self, app):
         for lakeCoords in app.lakeRowsAndCols:
             if lakeCoords in self.coords:
-                self.exists = False
+                app.worldElementList.remove(self)
                 dirt = Dirt(self.coords, app.time)
                 app.worldElementList.append(dirt)
                 app.canDirt = True
+                break
 
 class Plant(worldElement): 
     def __init__(self, coords, time):
@@ -89,7 +89,6 @@ class Plant(worldElement):
             if isinstance(element, Rock):
                 for point in coords:
                     if point in self.coord
-                    self.exists = False
                     dirt = Dirt(self.coords)
                     app.worldElementList.append(dirt)
                     app.canDirt = True
@@ -115,7 +114,7 @@ class Plant(worldElement):
             if isinstance(element, Dirt):
                 for dirtPoint in element.coords:
                     if dirtPoint in self.coords:
-                        self.exists = False
+                        app.worldElementList.remove(self)
                         tree = Tree(self.coords, app.time)
                         app.worldElementList.append(tree)
                         app.canTree = True
@@ -124,7 +123,9 @@ class Plant(worldElement):
             if isinstance(element, Rock):
                 for rockPoint in element.coords:
                     if rockPoint in self.coords:
-                        self.exists = False
+                        print("before", app.worldElementList)
+                        app.worldElementList.remove(self)
+                        print("after", app.worldElementList)
                         seed = Seed(self.coords, app.time)
                         app.worldElementList.append(seed)
                         app.canSeed = True
@@ -165,12 +166,13 @@ class Dirt(worldElement):
                         break
         nearbySeeds = list(nearbySeeds)
         if len(nearbySeeds)>=2:
-            for i in range(len(nearbySeeds)-1):
+            for i in range(2):
+                print("removing: ", i)
                 app.worldElementList.remove(nearbySeeds[i])
             seed = Seed(self.coords, app.time, True)
+            print("dirt trying to append: ", seed)
             app.worldElementList.append(seed)
                         
-
 class Tree(worldElement):
     def __init__(self, coords, time):
         super().__init__(coords, time)
@@ -194,6 +196,7 @@ class Tree(worldElement):
     def checkTime(self, app): 
         if (app.time - self.timeCreated > 2) and not self.spawnedAnimal:
             num = random.randrange(1, 4, 1)
+            print("spawning animal....")
             animal = None
             if num == 1:
                 animal = Rabbit(self.coords, app.time)
@@ -209,6 +212,7 @@ class Rabbit(worldElement):
         super().__init__(coords, time)
        
     def drawElement(self, canvas, app):
+        print("drawing rabbit")
         pt1R, pt1C = self.coords[0]
         pt2R, pt2C = self.coords[1]
         pt3R, pt3C = self.coords[2]
@@ -230,6 +234,7 @@ class Bird(worldElement):
         super().__init__(coords, time)
        
     def drawElement(self, canvas, app):
+        print("drawing bird")
         pt1R, pt1C = self.coords[0]
         pt2R, pt2C = self.coords[1]
         pt3R, pt3C = self.coords[2]
@@ -251,6 +256,7 @@ class Cow(worldElement):
         super().__init__(coords, time)
        
     def drawElement(self, canvas, app):
+        print("drawing cow")
         pt1R, pt1C = self.coords[0]
         pt2R, pt2C = self.coords[1]
         pt3R, pt3C = self.coords[2]
@@ -271,6 +277,7 @@ class Seed(worldElement):
         self.inGarden = gardenStatus
         
     def drawElement(self, canvas, app):
+        print("drawing seed")
         pt1R, pt1C = self.coords[0]
         pt2R, pt2C = self.coords[1]
         pt3R, pt3C = self.coords[2]
@@ -288,12 +295,13 @@ class Seed(worldElement):
         canvas.create_oval(base2X-2, base2Y-2, base2X+2, base2Y+2, fill = "tomato2")
         base3X, base3Y = baseX+1, baseY+1
         canvas.create_oval(base2X-2, base2Y-2, base2X+2, base2Y+2, fill = "OrangeRed3")
-
+    '''
     def checkTime(self, app): 
         if (app.time - self.timeCreated > 2) and self.inGarden: 
             flower = Flower(self.coords, app.time)   
             app.worldElementList.append(flower)
-            self.exist = False
+            app.worldElementList.remove(self)
+    '''
              
 class Flower(worldElement):
     def __init__(self, coords, time):

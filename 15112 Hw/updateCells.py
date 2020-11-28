@@ -266,12 +266,6 @@ def checkSurroundingOfAllElements(app):
     for element in app.worldElementList:
             element.checkSurrounding(app)
 
-    count = 0
-    while count < len(app.worldElementList):          
-        element = app.worldElementList[count]
-        if not element.exists:
-            app.worldElementList.pop(count)
-        count += 1
 
 def checkTimeOfAllElements(app):
     for element in app.worldElementList:
@@ -350,7 +344,6 @@ def grayScottyBoy():
 def main():
     grayScottyBoy()
     master = Tk()
-
 
 if __name__ == '__main__':
     main()
