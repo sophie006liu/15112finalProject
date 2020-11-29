@@ -39,19 +39,20 @@ def pointTransformer(point):
     sin = math.cos(math.pi*5/6)
     cos = math.sin(math.pi*5/6)
     k1 = [[cos, -1 * sin , 50], \
-        [sin,  cos      , 50], \
-        [0  ,  0      , 1] ] 
+         [sin,  cos      , 50], \
+         [0  ,  0      , 1] ] 
 
     #set k2 matrix 
     k2 = [[20,5,0,0], \
-        [5,20,0,0], \
-        [0,0,1,0] ] 
+         [5 ,20,0,0], \
+         [0, 0,1, 0] ] 
 
     k = matrixmultiplication(k1, k2)
 
     newPoint = matrixmultiplication(k, point)
     #x translation
     newPoint[0] = newPoint[0][0] + 70
+    #y translation
     newPoint[1] = newPoint[1][0] + 380
     return newPoint
 

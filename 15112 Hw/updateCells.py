@@ -1,5 +1,5 @@
 from cmu_112_graphics import *
-import math, copy, projectionOperations, worldElements  
+import math, copy, random, projectionOperations, worldElements, StarShower 
 
 
 def appStarted(app):
@@ -12,7 +12,7 @@ def appStarted(app):
     if not app.drawLine:
         app.timerDelay = 50
     else:
-        app.timerDelay = 1000
+        app.timerDelay = 10000
 
     app.count = 0
     app.dA = 0.2
@@ -317,7 +317,12 @@ def drawBoard(app, canvas):
         #draw all elements
         for index, element in enumerate(app.worldElementList):
             element.drawElement(canvas, app) #the coordinates are 4 sets of row and col
-
+        
+        starChance = random.randrange(1, 101, 1)
+        if starChance <= 50:
+            starX = random.randrange(30, app.width, 1)
+            starY = random.randrange(20, app.height/5, 1)
+            StarShower.drawStarShower(canvas, 4, starX, starY, 100, 4)
 def checkSurroundingOfAllElements(app):
     #checking surroundings of all elements
     for element in app.worldElementList:
