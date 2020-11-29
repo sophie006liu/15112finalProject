@@ -35,6 +35,7 @@ def matrixmultiplication(X, Y):
 
 #takes in a (X, Y, Z, 1) point and applies transformation
 def pointTransformer(point):
+    point[2] = point[2]*15
     #set k1 matrix 
     sin = math.cos(math.pi*5/6)
     cos = math.sin(math.pi*5/6)

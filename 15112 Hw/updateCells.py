@@ -372,7 +372,7 @@ def transformPoints(app):
     #going through that row and generating points from it
     for i in range(len(app.boardA)):
         for j in range(len(app.boardA[0])):
-            startPoint = (i, j, app.boardA[i][j], 1) 
+            startPoint = [i, j, app.boardA[i][j], 1] 
             newPoint = projectionOperations.pointTransformer(startPoint)
             if (app.boardA[i][j] > 0.12):
                 app.lakeRowsAndCols.append([i,j])
