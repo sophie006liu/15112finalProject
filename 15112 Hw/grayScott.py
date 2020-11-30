@@ -6,23 +6,23 @@ def appStarted(app):
     app.drawLine = False
     app.rows, app.cols, app.cellSize, app.margin = gameDimensions()
 
-    app.boardA = make2dList(app.rows, app.cols)
-    app.boardB = make2dList(app.rows, app.cols)  
+    app.boardA = make2dList(app.rows, app.cols, 1)
+    app.boardB = make2dList(app.rows, app.cols, 0)  
     app.threeDPoints = make2dList(app.rows, app.cols)
 
     if not app.drawLine:
-        app.timerDelay = 1000
+        app.timerDelay = 50
     else:
         app.timerDelay = 10000
 
-    app.dA = 0.2
-    app.dA_diagonal = 0.05
-    app.dB = 0.5 * app.dA
+    app.dA = 0.2*0.2 #the diffusion percentage times dA
+    app.dA_diagonal = 0.05*0.2
+    app.dB = 0.2*0.1 #the diffusion percentage times dB 
     app.dB_diagonal = 0.5 * app.dA_diagonal 
     #feed rate
-    app.f = 0.037
+    app.f = 0.055
     #kill rate
-    app.k = 0.06
+    app.k = 0.062
 
     #stores building block coordinates in terms of their surrounding points
     app.blockCoords = []
@@ -48,8 +48,8 @@ def appStarted(app):
 
     app.pause = False
 #make2dlist
-def make2dList(rows, cols):
-        return [([0] * cols) for row in range(rows)]
+def make2dList(rows, cols, defVal = 0):
+        return [([defVal] * cols) for row in range(rows)]
 
 def maxItemLength(a):
     maxLen = 0
@@ -60,13 +60,28 @@ def maxItemLength(a):
             maxLen = max(maxLen, len(str(a[row][col])))
     return maxLen
 
+def seedB(app, r, c):
+    directions = [(-1, -1), (-1, 0), (-1, 1),
+                   (0, -1),         (0, 1),
+                   (1, -1), (1, 0), (1, 1) ]
+    app.boardB[r][c] = 1
+    for row in range(app.rows):
+        for col in range(app.cols):
+            for direction in directions:
+                if neighborExists(app, direction, row, col):
+                    dRow = direction[0]
+                    dCol = direction[1]
+                    newRow = r + dRow
+                    newCol = c + dCol
+                    app.boardB[newRow][newCol] = 1
+                     
 def mousePressed(app, event):
     if not app.drawLine:
         #if the user clicks then they drop a seed into the diffusing board
         rows = event.y // app.cellSize
-        cols = event.x // app.cellSize
-        app.boardA[rows][cols] = 1
-        app.boardB[rows][cols] = 1
+        cols = event.x // app.cellSize 
+        seedB(app, rows, cols)
+
     elif app.drawLine: # we are in the mode of adding elements to the board
         coords = (get3DPointsAroundPoint(app, event.x, event.y)) 
         timeCreated = app.time
@@ -182,170 +197,83 @@ def keyPressed(app, event):
             app.mode = "s"
     '''
 #let the cells diffuse
+
+def neighborExists(app, direction, row, col):
+    dRow = direction[0]
+    dCol = direction[1]
+
+    newRow = row + dRow
+    newCol = col + dCol
+
+    if newRow >= 0 and newRow <= (app.rows-1) and newCol >= 0 and newCol <= (app.cols-1):
+        return True
+    else:
+        return False
+
 def grayScottRD(app):
-    newBoardA = make2dList(app.rows, app.cols) 
-    newBoardB = make2dList(app.rows, app.cols) 
+    deltaBoardA = make2dList(app.rows, app.cols) 
+    deltaBoardB = make2dList(app.rows, app.cols) 
+    directions = [(-1, -1), (-1, 0), (-1, 1),
+                   (0, -1),         (0, 1),
+                   (1, -1), (1, 0), (1, 1) ]
+
+    #DIFFUSION
+    #contruct deltaA matrix
     for row in range(app.rows):
         for col in range(app.cols):
-            newNeighbor = 0
-            newB = 0
-            if row == 0:
-                if col == 0:  
-                    right = app.dA * app.boardA[row][col + 1]
-                    downRight = app.dA_diagonal * app.boardA[row + 1][col + 1]
-                    down = app.dA * app.boardA[row + 1][col]
-                    
-                    newNeighbor = right + downRight + down
+            for direction in directions:
+                if neighborExists(app, direction, row, col):
+                    # adjacent
+                    if direction in [(-1, 0), (0, -1), (0, 1), (1, 0)]:
+                        deltaA = app.dA*app.boardA[row][col]
+                        deltaB = app.dB*app.boardB[row][col]
+                    # diagonal
+                    if direction in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
+                        deltaA = app.dA_diagonal*app.boardA[row][col] 
+                        deltaB = app.dB_diagonal*app.boardA[row][col] 
+                    # where I put the delta
+                    deltaRow, deltaCol = row+direction[0], col+direction[1]
+                    deltaBoardA[deltaRow][deltaCol] += deltaA
+                    deltaBoardB[deltaRow][deltaCol] += deltaB
+                    # subtract from the center
+                    deltaBoardA[row][col] -= deltaA
+                    deltaBoardB[row][col] -= deltaB
 
-                    rightB = app.dB * app.boardB[row][col + 1]
-                    downRightB = app.dB_diagonal * app.boardB[row + 1][col + 1]
-                    downB = app.dB * app.boardB[row + 1][col]
-                    
-                    newB = rightB + downRightB + downB
-                elif col == app.cols - 1:
-                    left = app.dA * app.boardA[row][col - 1]
-                    downLeft = app.dA_diagonal * app.boardA[row + 1][col - 1]
-                    down = app.dA * app.boardA[row + 1][col]  
-                    
-                    newNeighbor = left + downLeft + down
+    #apply deltaA to the current boardA
+    DA = 1.0
+    DB = 0.5
+    DT = 10.0
+    for row in range(app.rows):
+        for col in range(app.cols):
 
-                    leftB = app.dB * app.boardB[row][col - 1]
-                    downLeft = app.dB_diagonal * app.boardB[row + 1][col - 1]
-                    down = app.dB * app.boardB[row + 1][col]  
-                    
-                    newB = left + downLeft + down
-                else:
-                    right = app.dA * app.boardA[row][col + 1]
-                    downRight = app.dA_diagonal * app.boardA[row + 1][col + 1]
-                    left = app.dA * app.boardA[row][col - 1]
-                    downLeft = app.dA_diagonal * app.boardA[row + 1][col - 1]
-                    down = app.dA * app.boardA[row + 1][col]         
+            A = app.boardA[row][col]
+            B = app.boardB[row][col]
+            sqlaplA = deltaBoardA[row][col]**2
+            sqlaplB = deltaBoardB[row][col]**2
+            rxnProd = A*B*B
+            #dA= 0.2 * delta**2 * A
+            app.boardA[row][col] = min(8000, max(0, A + (DA*sqlaplA - rxnProd + app.f*(1-A)) * DT))
+            app.boardB[row][col] = min(8000, max(0, B + (DB*sqlaplB + rxnProd - (app.k+app.f)*B) * DT))
+            if(app.boardA[row][col] < 0):
+                print(row, col, app.boardA[row][col])
+            if(app.boardB[row][col] < 0):
+                print(row, col, app.boardB[row][col])
+    printBoardA(app)
 
-                    newNeighbor = right + downRight + left + downLeft + down 
-
-                    rightB = app.dB * app.boardB[row][col + 1]
-                    downRightB = app.dB_diagonal * app.boardB[row + 1][col + 1]
-                    leftB = app.dB * app.boardB[row][col - 1]
-                    downLeftB = app.dB_diagonal * app.boardB[row + 1][col - 1]
-                    downB = app.dB * app.boardB[row + 1][col]         
-
-                    newB = rightB + downRightB + leftB + downLeftB + downB 
-            elif col == 0:
-                if row == app.rows - 1:
-                    right = app.dA * app.boardA[row][col + 1]
-                    upRight = app.dA_diagonal * app.boardA[row - 1][col + 1]
-                    up = app.dA * app.boardA[row - 1][col] 
-
-                    newNeighbor = right + upRight + up
-
-                    rightB = app.dB * app.boardB[row][col + 1]
-                    upRightB = app.dB_diagonal * app.boardB[row - 1][col + 1]
-                    upB = app.dB * app.boardB[row - 1][col] 
-
-                    newB = rightB + upRightB + upB
-                elif row > 0:
-                    right = app.dA * app.boardA[row][col + 1]
-                    upRight = app.dA_diagonal * app.boardA[row - 1][col + 1]
-                    up = app.dA * app.boardA[row - 1][col] 
-                    down = app.dA * app.boardA[row + 1][col]                   
-                    downRight = app.dA_diagonal * app.boardA[row + 1][col + 1]
-
-                    newNeighbor = right + upRight + up + down +downRight
-
-                    rightB = app.dB * app.boardB[row][col + 1]
-                    upRightB = app.dB_diagonal * app.boardB[row - 1][col + 1]
-                    upB = app.dB * app.boardB[row - 1][col] 
-                    downB = app.dB * app.boardB[row + 1][col]                   
-                    downRightB = app.dB_diagonal * app.boardB[row + 1][col + 1]
-
-                    newB = rightB + upRightB + upB + downB + downRightB
-            elif row == app.rows - 1:
-                if col == app.cols - 1:
-                    left = app.dA * app.boardA[row][col - 1]
-                    up = app.dA * app.boardA[row - 1][col]
-                    upLeft = app.dA_diagonal * app.boardA[row - 1][col - 1]
-
-                    newNeighbor = left + up + upLeft
-
-                    leftB = app.dB * app.boardB[row][col - 1]
-                    upB = app.dB * app.boardB[row - 1][col]
-                    upLeftB = app.dB_diagonal * app.boardB[row - 1][col - 1]
-
-                    newB = leftB + upB + upLeftB
-                elif col > 0:
-                    right = app.dA * app.boardA[row][col + 1]
-                    upRight = app.dA_diagonal * app.boardA[row - 1][col + 1]   
-                    up = app.dA * app.boardA[row - 1][col]   
-                    left = app.dA * app.boardA[row][col - 1]       
-                    upLeft = app.dA_diagonal * app.boardA[row - 1][col - 1]   
-
-                    newNeighbor = right + upRight + up + left + upLeft  
-
-                    rightB = app.dB * app.boardB[row][col + 1]
-                    upRightB = app.dB_diagonal * app.boardB[row - 1][col + 1]   
-                    upB = app.dB * app.boardB[row - 1][col]   
-                    leftB = app.dB * app.boardB[row][col - 1]       
-                    upLeftB = app.dB_diagonal * app.boardB[row - 1][col - 1]   
-
-                    newB = rightB + upRightB + upB + leftB + upLeftB   
-            elif col == app.cols - 1:
-                if row < app.rows -1 and row > 0:
-                    up = app.dA * app.boardA[row - 1][col] 
-                    down = app.dA * app.boardA[row + 1][col]                   
-                    left = app.dA * app.boardA[row][col - 1]
-                    downLeft = app.dA_diagonal * app.boardA[row + 1][col - 1]
-                    upLeft = app.dA_diagonal * app.boardA[row - 1][col - 1] 
-
-                    newNeighbor = up + down + left + downLeft + upLeft
-
-                    upB = app.dB * app.boardB[row - 1][col] 
-                    downB = app.dB * app.boardB[row + 1][col]                   
-                    leftB = app.dB * app.boardB[row][col - 1]
-                    downLeftB = app.dB_diagonal * app.boardB[row + 1][col - 1]
-                    upLeftB = app.dB_diagonal * app.boardB[row - 1][col - 1] 
-
-                    newB = upB + downB + leftB + downLeftB + upLeftB
-            else:
-                right = app.dA * app.boardA[row][col + 1]
-                upRight = app.dA_diagonal * app.boardA[row - 1][col + 1]
-                downRight = app.dA_diagonal * app.boardA[row + 1][col + 1]
-                up = app.dA * app.boardA[row - 1][col] 
-                down = app.dA * app.boardA[row + 1][col]                   
-                left = app.dA * app.boardA[row][col - 1]
-                downLeft = app.dA_diagonal * app.boardA[row + 1][col - 1]
-                upLeft = app.dA_diagonal * app.boardA[row - 1][col - 1] 
-
-                newNeighbor = right + upRight + downRight + up + down + left + \
-                    downLeft + upLeft  
-
-                rightB = app.dB * app.boardB[row][col + 1]
-                upRightB = app.dB_diagonal * app.boardB[row - 1][col + 1]
-                downRightB = app.dB_diagonal * app.boardB[row + 1][col + 1]
-                upB = app.dB * app.boardB[row - 1][col] 
-                downB = app.dB * app.boardB[row + 1][col]                   
-                leftB = app.dB * app.boardB[row][col - 1]
-                downLeftB = app.dB_diagonal * app.boardB[row + 1][col - 1]
-                upLeftB = app.dB_diagonal * app.boardB[row - 1][col - 1] 
-
-                newB = rightB + upRightB + downRightB + upB + downB + leftB + \
-                    downLeftB + upLeftB       
-
-            ogA = app.boardA[row][col] 
-            ogB = app.boardB[row][col] 
-            reproduceChange = ogA * (ogB ** 2)
-            newBoardA[row][col] = newNeighbor  + ogA - (app.dA * ogA) #+ \
-                #((1 - ogA) * app.f) - reproduceChange 
-            newBoardB[row][col] = newB + ogB - (ogB * app.dB) #- (app.k * ogB) \
-                #+ reproduceChange
-    app.boardA = newBoardA       
-    app.boardB = newBoardB  
-
-
+def printBoardA(app):
+    print("new board")
+    for row in range(app.rows):
+        for col in range(app.cols):
+            if abs(app.boardA[row][col] -1.0) > 0.0000000000000000001:
+                print("A", row, col,app.boardA[row][col])
+            if app.boardB[row][col]:
+                print("B", row, col,app.boardB[row][col])
+    print()
 #setting up the diffuse board dimensions
 def gameDimensions():
-    rows = 21
-    cols = 21
-    cellSize = 40
+    rows = 51
+    cols = 51
+    cellSize = 20
     margin = 40
     return (rows, cols ,cellSize, margin)
 
@@ -381,18 +309,21 @@ def drawBoard(app, canvas):
     if not app.drawLine:
         for row in range(app.rows):
             for col in range(app.cols):
-                text = str(round(app.boardA[row][col], 3)) #+ ", " + \
+                #text = str(round(app.boardA[row][col], 3)) + ", " + \
                     #str(round(app.boardB[row][col], 3))
-                if (app.boardA[row][col]) != 0:
-                    scaleRed = int(abs(math.log(app.boardA[row][col]))) * 4 + 126
+                if (app.boardA[row][col]) > 0:
+                    scaleRed = min(255, int(abs(math.log(app.boardA[row][col])) * 50 + 126))
                 else:
                     scaleRed = 1
-                scaleGreen = 255 -scaleRed
+                if (app.boardB[row][col]) > 0:
+                    scaleGreen = min(255, int(abs(math.log(app.boardB[row][col])) * 50 + 126))
+                else:
+                    scaleGreen = 0
                 color = rgbString(scaleRed, scaleGreen, 0)
                 x0, y0, x1, y1 = getCellBounds(app, row, col)
                 canvas.create_rectangle(x0,y0, x1, y1, fill = color)
-                canvas.create_text((x0+x1)/2, (y0+y1)/2, text = text, \
-                    font = "arial 6")
+                #canvas.create_text((x0+x1)/2, (y0+y1)/2, text = text, \
+                    #font = "arial 10")
     else:
         #draw the contour plot
         drawLine(canvas, app)
