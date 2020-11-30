@@ -6,24 +6,25 @@ def appStarted(app):
     app.drawLine = False
     app.rows, app.cols, app.cellSize, app.margin = gameDimensions()
 
-    app.boardA = make2dList(app.rows, app.cols, 1)
-    app.boardB = make2dList(app.rows, app.cols, 0)  
+    app.boardA = make2dList(app.rows, app.cols, 1.0)
+    app.boardB = make2dList(app.rows, app.cols, 0.0)  
     app.threeDPoints = make2dList(app.rows, app.cols)
 
     if not app.drawLine:
-        app.timerDelay = 50
+        app.timerDelay = 1
     else:
         app.timerDelay = 10000
 
-    app.dA = 0.2*0.2 #the diffusion percentage times dA
-    app.dA_diagonal = 0.05*0.2
-    app.dB = 0.2*0.1 #the diffusion percentage times dB 
-    app.dB_diagonal = 0.5 * app.dA_diagonal 
+    app.dA = 0.2 #the diffusion percentage times DA
+    app.dA_diagonal = 0.05
+    app.dB = 0.2 #the diffusion percentage times DB 
+    app.dB_diagonal = 0.05
     #feed rate
     app.f = 0.055
     #kill rate
-    app.k = 0.062
+    app.k = 0.117
 
+    app.iter = 0
     #stores building block coordinates in terms of their surrounding points
     app.blockCoords = []
     app.marbleX = None
@@ -48,7 +49,7 @@ def appStarted(app):
 
     app.pause = False
 #make2dlist
-def make2dList(rows, cols, defVal = 0):
+def make2dList(rows, cols, defVal = 0.0):
         return [([defVal] * cols) for row in range(rows)]
 
 def maxItemLength(a):
@@ -225,40 +226,40 @@ def grayScottRD(app):
                 if neighborExists(app, direction, row, col):
                     # adjacent
                     if direction in [(-1, 0), (0, -1), (0, 1), (1, 0)]:
-                        deltaA = app.dA*app.boardA[row][col]
-                        deltaB = app.dB*app.boardB[row][col]
+                        deltaA = app.dA*app.boardA[row][col] #dA = 0.2*0.2
+                        deltaB = app.dB*app.boardB[row][col]  
                     # diagonal
                     if direction in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
                         deltaA = app.dA_diagonal*app.boardA[row][col] 
-                        deltaB = app.dB_diagonal*app.boardA[row][col] 
+                        deltaB = app.dB_diagonal*app.boardB[row][col] 
                     # where I put the delta
                     deltaRow, deltaCol = row+direction[0], col+direction[1]
                     deltaBoardA[deltaRow][deltaCol] += deltaA
                     deltaBoardB[deltaRow][deltaCol] += deltaB
                     # subtract from the center
-                    deltaBoardA[row][col] -= deltaA
-                    deltaBoardB[row][col] -= deltaB
+            deltaBoardA[row][col] -= app.boardA[row][col] 
+            deltaBoardB[row][col] -= app.boardB[row][col] 
 
     #apply deltaA to the current boardA
     DA = 1.0
     DB = 0.5
-    DT = 10.0
+    DT = 1.0
+    epsilon = 0.0000000000001
     for row in range(app.rows):
         for col in range(app.cols):
-
             A = app.boardA[row][col]
             B = app.boardB[row][col]
-            sqlaplA = deltaBoardA[row][col]**2
-            sqlaplB = deltaBoardB[row][col]**2
-            rxnProd = A*B*B
             #dA= 0.2 * delta**2 * A
-            app.boardA[row][col] = min(8000, max(0, A + (DA*sqlaplA - rxnProd + app.f*(1-A)) * DT))
-            app.boardB[row][col] = min(8000, max(0, B + (DB*sqlaplB + rxnProd - (app.k+app.f)*B) * DT))
-            if(app.boardA[row][col] < 0):
-                print(row, col, app.boardA[row][col])
-            if(app.boardB[row][col] < 0):
-                print(row, col, app.boardB[row][col])
-    printBoardA(app)
+            app.boardA[row][col] = min(1.0, max(epsilon, A + (DA*deltaBoardA[row][col] - A*B*B + app.f*(1.0-A)) * DT))
+            app.boardB[row][col] = min(1.0, max(epsilon, B + (DB*deltaBoardB[row][col] + A*B*B - (app.k*B)) * DT))
+                
+            if app.boardA[row][col] < 0 or app.boardA[row][col] >1:
+                print("NewA is out of range", row, col, A, B, deltaBoardA[row][col], A*B*B, deltaBoardB[row][col])
+                print(app.boardA[row][col])
+            if app.boardB[row][col] < 0 or app.boardB[row][col] > 1:
+                print("NewB is out of range", row, col, A, B, deltaBoardA[row][col], A*B*B, deltaBoardB[row][col])
+                print(app.boardB[row][col])
+    #printBoardA(app)
 
 def printBoardA(app):
     print("new board")
@@ -269,11 +270,12 @@ def printBoardA(app):
             if app.boardB[row][col]:
                 print("B", row, col,app.boardB[row][col])
     print()
+
 #setting up the diffuse board dimensions
 def gameDimensions():
-    rows = 51
-    cols = 51
-    cellSize = 20
+    rows = 75
+    cols = 75
+    cellSize = 10
     margin = 40
     return (rows, cols ,cellSize, margin)
 
@@ -311,15 +313,12 @@ def drawBoard(app, canvas):
             for col in range(app.cols):
                 #text = str(round(app.boardA[row][col], 3)) + ", " + \
                     #str(round(app.boardB[row][col], 3))
-                if (app.boardA[row][col]) > 0:
-                    scaleRed = min(255, int(abs(math.log(app.boardA[row][col])) * 50 + 126))
-                else:
-                    scaleRed = 1
-                if (app.boardB[row][col]) > 0:
-                    scaleGreen = min(255, int(abs(math.log(app.boardB[row][col])) * 50 + 126))
-                else:
-                    scaleGreen = 0
-                color = rgbString(scaleRed, scaleGreen, 0)
+                #if (app.boardA[row][col]) > 0:
+                #scaleRed = min(255, app.boardA[row][col]/(app.boardA[row][col]+ app.boardB[row][col]))
+                #color = rgbString(int(scaleRed), 127, 127)
+                scaleRed = min(255, app.boardA[row][col] * 127 + 127)
+                scaleGreen = min(255, app.boardB[row][col] * 127 + 127)
+                color = rgbString(int(scaleRed), int(scaleGreen), 0)
                 x0, y0, x1, y1 = getCellBounds(app, row, col)
                 canvas.create_rectangle(x0,y0, x1, y1, fill = color)
                 #canvas.create_text((x0+x1)/2, (y0+y1)/2, text = text, \
@@ -399,6 +398,9 @@ def oneDiffuse(app):
 def timerFired(app):
     if not app.drawLine and not app.pause:
         grayScottRD(app)
+        app.iter += 1
+        if app.iter%50 == 0:
+            print("iteration number : ", app.iter)
 
     if app.drawLine:
         app.time += 1
