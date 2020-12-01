@@ -1,12 +1,12 @@
-from cmu_112_graphics import *
-import math, copy, random, projectionOperations, worldElements, StarShower 
+from cmu_112_graphics import * #graphics package taken from class
+import math, copy, random, projectionOperations, worldElements#, StarShower don't need this yet/it can't work lol
 
-
+#stpres app variables
 def appStarted(app):
-    app.drawLine = False
+    app.drawLine = False #dictates whether gray scott phase or world creation phase
     app.rows, app.cols, app.cellSize, app.margin = gameDimensions()
 
-    app.boardA = make2dList(app.rows, app.cols, 1.0)
+    app.boardA = make2dList(app.rows, app.cols, 1.0) 
     app.boardB = make2dList(app.rows, app.cols, 0.0)  
     app.threeDPoints = make2dList(app.rows, app.cols)
 
@@ -15,25 +15,17 @@ def appStarted(app):
     else:
         app.timerDelay = 10000
 
-    app.dA = 0.2 #the diffusion percentage times DA
-    app.dA_diagonal = 0.05
-    app.dB = 0.2 #the diffusion percentage times DB 
-    app.dB_diagonal = 0.05
-    #feed rate
-    app.f = 0.055
-    #kill rate
-    app.k = 0.117
+    app.dA = 0.2    #the A diffusion percentage to adjacent cells
+    app.dA_diagonal = 0.05  #the A diffusion percentage to diagonal cells
+    app.dB = 0.2    #the B diffusion percentage to adjacent cells
+    app.dB_diagonal = 0.05  #the A diffusion percentage to diagonal cells
+    app.f = 0.055    #feed rate
+    app.k = 0.117    #kill rate
 
-    app.iter = 0
-    #stores building block coordinates in terms of their surrounding points
-    app.blockCoords = []
-    app.marbleX = None
-    app.marbleY = None
+    app.worldElementList = [] #stores all elements present on a board
 
-    app.worldElementList = []
-
-    app.mode = "r"
-    app.canDirt = True
+    app.mode = "r" #what element they are currently placing
+    app.canDirt = True  #keeps track of all the elements that have been unlocked
     app.canTree = True
     app.canSeed = True
     app.canFlower = True
@@ -47,21 +39,16 @@ def appStarted(app):
     app.canLantern = False
     app.lakeRowsAndCols = []
 
-    app.pause = False
-#make2dlist
+    app.time = 0 #keeps track of the world time
+    app.pause = False #for debugging purposes
+
+#make2dlist taken from class
 def make2dList(rows, cols, defVal = 0.0):
         return [([defVal] * cols) for row in range(rows)]
 
-def maxItemLength(a):
-    maxLen = 0
-    rows = len(a)
-    cols = len(a[0])
-    for row in range(rows):
-        for col in range(cols):
-            maxLen = max(maxLen, len(str(a[row][col])))
-    return maxLen
-
+#part of the gray scott function, initializes 3x3 area with particle B
 def seedB(app, r, c):
+    #directions list taken from class
     directions = [(-1, -1), (-1, 0), (-1, 1),
                    (0, -1),         (0, 1),
                    (1, -1), (1, 0), (1, 1) ]
@@ -75,7 +62,8 @@ def seedB(app, r, c):
                     newRow = r + dRow
                     newCol = c + dCol
                     app.boardB[newRow][newCol] = 1
-                     
+
+
 def mousePressed(app, event):
     if not app.drawLine:
         #if the user clicks then they drop a seed into the diffusing board
@@ -116,19 +104,18 @@ def mousePressed(app, event):
             element = worldElements.Lantern(coords, timeCreated)
         app.worldElementList.append(element)      
 
-#if they press g, generate 2d line based off of the diffusing board middle row
 def keyPressed(app, event):
-    if event.key == "p":
+    #pause the diffusion
+    if event.key == "p" and not app.drawLine:
         app.pause = not app.pause
-    
-    if event.key == "s":
-        oneDiffuse(app)
 
+    #leave diffusion board go to 3D terrain
     if event.key == "g" and not app.drawLine:
         transformPoints(app)
         app.drawLine = True
 
-    if event.key == "r": #or event.key == "p":
+    #switch to rock mode and/or plant mode
+    if event.key == "r" or (event.key == "p" and app.drawLine):
         app.mode = event.key
 
     elif event.key == "d":
@@ -190,15 +177,15 @@ def keyPressed(app, event):
             print("First mine, then coal + iron")
         else:
             app.mode = "5"
-    '''
+
     elif event.key == "s":
         if not app.canSeed:
             print("Seeds isn't in the recipe book! Get creative lmao")
         else:
+            print("here seed")
             app.mode = "s"
-    '''
-#let the cells diffuse
-
+    
+#checks to see if a move in a particular direction is still on the board
 def neighborExists(app, direction, row, col):
     dRow = direction[0]
     dCol = direction[1]
@@ -214,12 +201,12 @@ def neighborExists(app, direction, row, col):
 def grayScottRD(app):
     deltaBoardA = make2dList(app.rows, app.cols) 
     deltaBoardB = make2dList(app.rows, app.cols) 
+    #directions list idea taken from class
     directions = [(-1, -1), (-1, 0), (-1, 1),
                    (0, -1),         (0, 1),
                    (1, -1), (1, 0), (1, 1) ]
 
     #DIFFUSION
-    #contruct deltaA matrix
     for row in range(app.rows):
         for col in range(app.cols):
             for direction in directions:
@@ -249,18 +236,18 @@ def grayScottRD(app):
         for col in range(app.cols):
             A = app.boardA[row][col]
             B = app.boardB[row][col]
-            #dA= 0.2 * delta**2 * A
+            #making sure the new values of A and B are in range ()
             app.boardA[row][col] = min(1.0, max(epsilon, A + (DA*deltaBoardA[row][col] - A*B*B + app.f*(1.0-A)) * DT))
             app.boardB[row][col] = min(1.0, max(epsilon, B + (DB*deltaBoardB[row][col] + A*B*B - (app.k*B)) * DT))
                 
             if app.boardA[row][col] < 0 or app.boardA[row][col] >1:
+                #this is the gray scott reaction formula taken from https://www.karlsims.com/rd.html
                 print("NewA is out of range", row, col, A, B, deltaBoardA[row][col], A*B*B, deltaBoardB[row][col])
                 print(app.boardA[row][col])
             if app.boardB[row][col] < 0 or app.boardB[row][col] > 1:
                 print("NewB is out of range", row, col, A, B, deltaBoardA[row][col], A*B*B, deltaBoardB[row][col])
-                print(app.boardB[row][col])
-    #printBoardA(app)
-
+               
+#for debugging purposes to see boardA 
 def printBoardA(app):
     print("new board")
     for row in range(app.rows):
@@ -273,21 +260,19 @@ def printBoardA(app):
 
 #setting up the diffuse board dimensions
 def gameDimensions():
-    rows = 75
-    cols = 75
-    cellSize = 10
+    rows = 21
+    cols = 21
+    cellSize = 40
     margin = 40
     return (rows, cols ,cellSize, margin)
 
+#2D get cell bounds
 def getCellBounds(app, row, col):
     x0 = app.cellSize * col
     y0 = app.cellSize * row 
     x1 = app.cellSize * (col + 1)
     y1 = app.cellSize * (row + 1)
     return x0, y0, x1, y1
-
-def getDistance(x1,y1,x2,y2):
-    return math.sqrt((x1-x2)**2+(y1-y2)**2)
 
 #given x,y on the window, it will return the points in threeDpoints that surround the click
 def get3DPointsAroundPoint(app, x, y):
@@ -311,18 +296,11 @@ def drawBoard(app, canvas):
     if not app.drawLine:
         for row in range(app.rows):
             for col in range(app.cols):
-                #text = str(round(app.boardA[row][col], 3)) + ", " + \
-                    #str(round(app.boardB[row][col], 3))
-                #if (app.boardA[row][col]) > 0:
-                #scaleRed = min(255, app.boardA[row][col]/(app.boardA[row][col]+ app.boardB[row][col]))
-                #color = rgbString(int(scaleRed), 127, 127)
                 scaleRed = min(255, app.boardA[row][col] * 127 + 127)
                 scaleGreen = min(255, app.boardB[row][col] * 127 + 127)
                 color = rgbString(int(scaleRed), int(scaleGreen), 0)
                 x0, y0, x1, y1 = getCellBounds(app, row, col)
-                canvas.create_rectangle(x0,y0, x1, y1, fill = color)
-                #canvas.create_text((x0+x1)/2, (y0+y1)/2, text = text, \
-                    #font = "arial 10")
+                canvas.create_rectangle(x0,y0, x1, y1, fill = color) 
     else:
         #draw the contour plot
         drawLine(canvas, app)
@@ -330,22 +308,26 @@ def drawBoard(app, canvas):
         #draw all elements
         for index, element in enumerate(app.worldElementList):
             element.drawElement(canvas, app) #the coordinates are 4 sets of row and col
-        
+       
+        '''
         starChance = random.randrange(1, 101, 1)
         if starChance <= 50:
             starX = random.randrange(30, app.width, 1)
             starY = random.randrange(20, app.height/5, 1)
             StarShower.drawStarShower(canvas, 4, starX, starY, 100, 4)
+        '''
+
+#checking surroundings of all elements
 def checkSurroundingOfAllElements(app):
-    #checking surroundings of all elements
     for element in app.worldElementList:
             element.checkSurrounding(app)
 
-
+#updates all cells based on time related interactions
 def checkTimeOfAllElements(app):
     for element in app.worldElementList:
         element.checkTime(app)
 
+#drawing the lines of the contour plot
 def drawLine(canvas, app):
     for i in range(len(app.threeDPoints)):
         for j in range(len(app.threeDPoints[0])-1):
@@ -356,6 +338,7 @@ def drawLine(canvas, app):
             nxtPt = app.threeDPoints[i][j + 1]
             x2 = nxtPt[0]
             y2 = nxtPt[1]
+            #debugging purposes to get sense of board orientation
             if (i == 0 and j == 0):
                 canvas.create_oval(x1-2, y1-2, x1+2, y1+2, fill = "red")
             elif (i == 1 and j == 1):  
@@ -376,7 +359,7 @@ def drawLine(canvas, app):
             x2 = nxtPt[0]
             y2 = nxtPt[1]
 
-            if (app.boardA[i][j] > 0.12):
+            if (app.boardB[i][j] > 0.12):
                 canvas.create_oval(x1-2, y1-2, x1+2, y1+2, fill = "dark blue")
             canvas.create_line(x1,y1,x2,y2)
              
@@ -385,12 +368,14 @@ def transformPoints(app):
     #going through that row and generating points from it
     for i in range(len(app.boardA)):
         for j in range(len(app.boardA[0])):
-            startPoint = [i, j, app.boardA[i][j], 1]
+            startPoint = [i, j, app.boardB[i][j]/4, 1]
             newPoint = projectionOperations.pointTransformer(startPoint)
-            if (app.boardA[i][j] > 0.12):
+            if (app.boardB[i][j] + app.boardB[i][j] > 0.7): 
                 app.lakeRowsAndCols.append([i,j])
+
             app.threeDPoints[i][j] = newPoint
 
+#if paused, take one step in diffusing
 def oneDiffuse(app):
     grayScottRD(app)
 
@@ -398,14 +383,11 @@ def oneDiffuse(app):
 def timerFired(app):
     if not app.drawLine and not app.pause:
         grayScottRD(app)
-        app.iter += 1
-        if app.iter%50 == 0:
-            print("iteration number : ", app.iter)
 
     if app.drawLine:
-        app.time += 1
         checkSurroundingOfAllElements(app)
         checkTimeOfAllElements(app)
+    app.time += 1 
 
 #refreshes the canvas each time
 def redrawAll(canvas, app):

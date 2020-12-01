@@ -4,7 +4,8 @@ import math
 def make2dList(rows, cols):
         return [([0] * cols) for row in range(rows)]
 
-#matrix multiplier
+#matrix multiplier from https://www.educative.io/edpresso/how-to-multiply-matrices-in-python
+#but adapted so that if the result is a vector I dont have a 2D list
 def matrixmultiplication(X, Y):
     if isinstance(Y[0],int): 
         r = len(X) 
@@ -33,34 +34,35 @@ def matrixmultiplication(X, Y):
                     result[i][j] += X[i][k] * Y[k][j]
         return result
 
-#takes in a (X, Y, Z, 1) point and applies transformation
+#takes in a (X, Y, Z, 1) point and applies transformation using planar homography
 def pointTransformer(point):
     point[2] = point[2]*15
-    #set k1 matrix 
+    #set k1 matrix, set up viwer's focal distance and rotation of the board
     sin = math.cos(math.pi*5/6)
     cos = math.sin(math.pi*5/6)
-    k1 = [[cos, -1 * sin , 50], \
-         [sin,  cos      , 50], \
+    k1 = [[cos, -1 * sin , 10], \
+         [sin,  cos      , 10], \
          [0  ,  0      , 1] ] 
 
-    #set k2 matrix 
-    k2 = [[20,5,0,0], \
-         [5 ,20,0,0], \
+    #set k2 matrix , scale the board's area to be bigger and shear it for better viewing angle
+    k2 = [[22,5,0,0], \
+         [5 ,22,0,0], \
          [0, 0,1, 0] ] 
 
     k = matrixmultiplication(k1, k2)
 
     newPoint = matrixmultiplication(k, point)
     #x translation
-    newPoint[0] = newPoint[0][0] + 70
+    newPoint[0] = newPoint[0][0] + 50
     #y translation
-    newPoint[1] = newPoint[1][0] + 380
+    newPoint[1] = newPoint[1][0] +350
     return newPoint
 
 #pt1 is the < minX
 #pt2 is the ^ minY
 #pt3 is the > maxX
 #pt4 is the v maxY
+
 #takes in 4 x,y coordinates and generates the middle of them
 def centerOf4Coords(pt1, pt2, pt3, pt4):
     minX = min(pt1[0], pt2[0])
@@ -83,29 +85,6 @@ def centerOf3DCoords(pt1, pt2, pt3, pt4):
 
     return [x,y,z]
 
-#input is 4 3D points & desired distance from the center of the points
-#returns x,y,x orthogonal to the center of the grid 
-def orthogonalVector(pt1, pt2, pt3, pt4, length):
-    baseX, baseY, baseZ = centerOf3DCoords(pt1, pt2, pt3,pt4)
-    #get the plane
-    u, v = planeFrom3Dpoints(pt1, pt2, pt3, pt4)
-
-    #equation = (u[2]*v[3]−v[2]*u[3])x−(u[1]v[3]−v[1]u[3])j+(u[1]v[2]−v[1]u[2])k.
-    a = u[1]*v[2]-v[1]*u[2]
-    b = (-1*u[0]*v[2])+v[0]*u[2]
-    c = u[0]*v[1]-v[0]*u[1]
-    magnitude = magnitudeOfVector([a,b,c])
-
-    aNormal = a/magnitude 
-    bNormal = b/magnitude
-    cNormal = c/magnitude
-
-    newX = length*aNormal+baseX
-    newY = length*bNormal+baseY
-    newZ = length*cNormal+baseZ
-
-    return [newX, newY, newZ], [baseX, baseY, baseZ]
-
 #calculate magnitude of vector, any dimension works
 def magnitudeOfVector(v):
     sum = 0
@@ -122,11 +101,13 @@ def planeFrom3Dpoints(pt1, pt2, pt3,pt4):
 
     return [v1, v2]
 
+#using barycentric coordinates to see if a point is inside a polygon
 def insidePolygon(p1,p2,p3,p4, target):
     if insideTriangle(p1,p2,p3, target) \
         or insideTriangle(p1,p3,p4, target):
         return True
 
+#formula from http://www.gamesbyageek.com/triangulation/point-inside-triangle-actionscript.php
 def insideTriangle(p1,p2,p3, target):
     # compute vectors        
     v0 = [0,0]

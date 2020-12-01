@@ -15,6 +15,7 @@ class worldElement(object):
         pt3R, pt3C = self.coords[2]
         pt4R, pt4C = self.coords[3]
 
+        #get points that outline the grid containg the world element
         pt1 = app.threeDPoints[pt1R][pt1C]
         pt2 = app.threeDPoints[pt2R][pt2C]
         pt3 = app.threeDPoints[pt3R][pt3C]
@@ -49,7 +50,8 @@ class Rock(worldElement):
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "gray")
 
-    def checkSurrounding(self, app):
+    def checkSurrounding(self, app):    
+        #if the rock is submerged in water you get dirt   
         for lakeCoords in app.lakeRowsAndCols:
             if lakeCoords in self.coords:
                 app.worldElementList.remove(self)
@@ -57,6 +59,8 @@ class Rock(worldElement):
                 app.worldElementList.append(dirt)
                 app.canDirt = True
                 break
+        
+        #if there are 2 trees nearby fire is created!
         nearbyTrees = set()
         for element in app.worldElementList:
             if isinstance(element, Tree):
@@ -64,6 +68,7 @@ class Rock(worldElement):
                     if treePoint in self.coords and element not in nearbyTrees:
                         nearbyTrees.add(element)
                         break
+
         nearbyTrees = list(nearbyTrees)
         if len(nearbyTrees)>=2:
             for i in range(2):
@@ -91,6 +96,7 @@ class Fire(worldElement):
         canvas.create_rectangle(baseX-5, baseY-2, baseX+5, baseY+2, fill = "red")
 
     def checkSurrounding(self, app):
+        #fire and rock creates steel
         for element in app.worldElementList:
             if isinstance(element, Rock):
                 if element.coords == self.coords:
@@ -123,6 +129,7 @@ class Steel(worldElement):
         canvas.create_rectangle(baseX-5, baseY-2, baseX+5, baseY+2, fill = "LightBlue3")
 
     def checkSurrounding(self, app):
+        #steel near trees becomes a tool
         for element in app.worldElementList:
             if isinstance(element, Tree): 
                     for treePoint in element.coords:
@@ -151,6 +158,7 @@ class Tool(worldElement):
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_rectangle(baseX-5, baseY-2, baseX+5, baseY+2, fill = "SlateBlue2")
     
+    #tool near rock makes iron, coal, diamond, or gold
     def checkSurrounding(self, app):
         for element in app.worldElementList:
             if isinstance(element, Rock): 
@@ -213,6 +221,8 @@ class Iron(worldElement):
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_rectangle(baseX-3, baseY-2, baseX+3, baseY+2, fill = "LavenderBlush2")
+    
+    #iron and rock makes lantern
     def checkSurrounding(self, app):
         for element in app.worldElementList:
             if isinstance(element, Coal): 
@@ -302,6 +312,7 @@ class Plant(worldElement):
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = self.color)
 
+    #plant grows into tree
     def checkSurrounding(self, app):
         for element in app.worldElementList:
             if isinstance(element, Dirt):
@@ -313,6 +324,7 @@ class Plant(worldElement):
                         app.canTree = True
                         break
 
+        #plant submerged in water becomes seaweed
         for lakeCoords in app.lakeRowsAndCols:
             if lakeCoords in self.coords:
                 self.color = "light sea green"
@@ -398,6 +410,7 @@ class Tree(worldElement):
         canvas.create_oval(baseX-5, baseY-10, baseX +  5, baseY + 5, fill = "dark green")
    
     def checkTime(self, app): 
+        #over time the tree will spawn an animal
         if (app.time - self.timeCreated > 2) and not self.spawnedAnimal:
             num = random.randrange(1, 4, 1)
             animal = None
