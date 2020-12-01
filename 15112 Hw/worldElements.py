@@ -323,6 +323,16 @@ class Plant(worldElement):
                         app.worldElementList.append(tree)
                         app.canTree = True
                         break
+    #plant becomes seeds near rock 
+        for element in app.worldElementList:
+            if isinstance(element, Rock):
+                for dirtPoint in element.coords:
+                    if dirtPoint in self.coords:
+                        app.worldElementList.remove(self)
+                        tree = Seed(self.coords, app.time)
+                        app.worldElementList.append(tree)
+                        app.canSeed = True
+                        break
 
         #plant submerged in water becomes seaweed
         for lakeCoords in app.lakeRowsAndCols:
