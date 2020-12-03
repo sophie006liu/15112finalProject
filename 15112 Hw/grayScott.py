@@ -109,7 +109,6 @@ def mousePressed(app, event):
             app.worldElementList.append(element)    
         elif (event.x%28 !=0 or (event.x//28)%2 ==1) and event.y > 570 and event.y < 600:
             buttonNum = event.x//28 
-            print(buttonNum)
             if buttonNum == 1: app.mode = "r"  
 
             if buttonNum == 3: app.mode = "p"
@@ -145,7 +144,6 @@ def keyPressed(app, event):
 
     #leave diffusion board go to 3D terrain
     if event.key == "g" and not app.drawLine:
-        print("IN here")
         transformPoints(app)
         app.drawLine = True
 
@@ -421,7 +419,7 @@ def drawLine(canvas, app):
             x2 = nxtPt[0]
             y2 = nxtPt[1]
 
-            if (app.boardB[i][j] > 0.12):
+            if (app.boardB[i][j] > 0.35):
                 canvas.create_oval(x1-2, y1-2, x1+2, y1+2, fill = "dark blue")
             canvas.create_line(x1,y1,x2,y2)
              
@@ -432,7 +430,7 @@ def transformPoints(app):
         for j in range(len(app.boardA[0])):
             startPoint = [i, j, app.boardB[i][j]/4, 1]
             newPoint = projectionOperations.pointTransformer(startPoint)
-            if (app.boardB[i][j] + app.boardB[i][j] > 0.7): 
+            if (app.boardB[i][j] > 0.35): 
                 app.lakeRowsAndCols.append([i,j])
 
             app.threeDPoints[i][j] = newPoint
@@ -446,8 +444,6 @@ def timerFired(app):
     if not app.drawLine and not app.pause:
         grayScottRD(app)
         app.iter += 1
-        if app.iter % 50 == 0:
-            print("iteration ", app.iter)
 
     if app.drawLine:
         checkAllElements(app)

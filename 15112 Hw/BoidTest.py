@@ -12,7 +12,6 @@ def distance(biod1, biod2):
 class Boid(object):
     
     def __init__(self, x, y):
-        print("in here")
         self.pos = [x,y]
         self.maxSpeed = 20
 
