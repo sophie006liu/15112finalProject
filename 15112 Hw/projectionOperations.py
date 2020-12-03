@@ -90,7 +90,7 @@ def magnitudeOfVector(v):
     sum = 0
     for component in v:
         sum += component **2
-    return sum/len(v)
+    return math.sqrt(sum)
 
 #takes in 3D data
 def planeFrom3Dpoints(pt1, pt2, pt3,pt4):

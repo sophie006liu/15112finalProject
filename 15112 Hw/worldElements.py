@@ -1,6 +1,6 @@
 
 from cmu_112_graphics import *
-import math, copy, random, projectionOperations
+import math, copy, random, projectionOperations, BoidTest
 
 class worldElement(object):
     #each element is a kind of element (tree, dirt, etc) 
@@ -423,13 +423,15 @@ class Tree(worldElement):
         #over time the tree will spawn an animal
         if (app.time - self.timeCreated > 2) and not self.spawnedAnimal:
             num = random.randrange(1, 4, 1)
-            animal = None
-            if num == 1:
-                animal = Rabbit(self.coords, app.time)
-            elif num == 2:
-                animal = Cow(self.coords, app.time)
-            elif num == 3:
-                animal = Bird(self.coords, app.time)
+            newCoords = copy.deepcopy(self.coords)
+            animal = Bird(newCoords, app.time)
+            #animal = None
+            #if num == 1:
+                #animal = Rabbit(self.coords, app.time)
+            # elif num == 2:
+            #     animal = Cow(self.coords, app.time)
+            # elif num == 3:
+            #     animal = Bird(self.coords, app.time)
             app.worldElementList.append(animal)
             self.spawnedAnimal = True
 
@@ -453,6 +455,20 @@ class Rabbit(worldElement):
         canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "white")
         canvas.create_oval(baseX-2, baseY-10, baseX, baseY + 1, fill = "white")
         canvas.create_oval(baseX, baseY-10, baseX+2, baseY + 1, fill = "white")
+    
+    def move(self, app):
+        directions = [(-1, -1), (-1, 0), (-1, 1),
+                   (0, -1),         (0, 1),
+                   (1, -1), (1, 0), (1, 1) ]
+        timeDiff = (app.time - self.timeCreated)%50
+        randomDirection = directions[random.randrange(0,8,1)]
+        dx = randomDirection[0]
+        dy = randomDirection[1]
+        if timeDiff == 0:
+            for point in self.coords:
+                point[0] += dx
+                point[1] += dy 
+
 
 class Bird(worldElement):
     def __init__(self, coords, time):
@@ -475,9 +491,17 @@ class Bird(worldElement):
         canvas.create_oval(baseX-2, baseY-10, baseX, baseY + 1, fill = "orange")
         canvas.create_oval(baseX, baseY-10, baseX+2, baseY + 1, fill = "orange")
 
+    def checkTime(self, app):
+        if self.timeCreated - app.time > 2:
+            app.worldElementList.remove(self)
+            biod  = Boid(10+ random.randrange (app.width-10), 10 + random.randrange (app.height-10))
+            app.biodList.append(biod)
+            
+
 class Cow(worldElement):
     def __init__(self, coords, time):
         super().__init__(coords, time)
+        self.switch = True
        
     def drawElement(self, canvas, app):
         pt1R, pt1C = self.coords[0]
@@ -493,6 +517,18 @@ class Cow(worldElement):
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "gainsboro")
+    
+    def move(self, app):
+        timeDiff = (app.time - self.timeCreated)%100
+        if self.switch and timeDiff == 0:
+            for point in self.coords:
+                point[0] += 1
+            self.switch = not self.switch
+        elif timeDiff == 0 and not self.switch:
+            for point in self.coords:
+                point[0] -= 1
+            self.switch = not self.switch
+
 
 class Seed(worldElement):
     def __init__(self, coords, time, gardenStatus = False):

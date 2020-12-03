@@ -1,5 +1,5 @@
 from cmu_112_graphics import * #graphics package taken from class
-import math, copy, random, projectionOperations, worldElements#, StarShower don't need this yet/it can't work lol
+import math, copy, random, projectionOperations, worldElements, BoidTest#, StarShower don't need this yet/it can't work lol
 
 #stpres app variables
 def appStarted(app):
@@ -15,6 +15,7 @@ def appStarted(app):
     else:
         app.timerDelay = 10000
 
+    app.iter = 0
     app.dA = 0.2    #the A diffusion percentage to adjacent cells
     app.dA_diagonal = 0.05  #the A diffusion percentage to diagonal cells
     app.dB = 0.2    #the B diffusion percentage to adjacent cells
@@ -23,6 +24,7 @@ def appStarted(app):
     app.k = 0.117    #kill rate
 
     app.worldElementList = [] #stores all elements present on a board
+    app.biodList = []
 
     app.mode = "r" #what element they are currently placing
     app.canDirt = True  #keeps track of all the elements that have been unlocked
@@ -36,7 +38,7 @@ def appStarted(app):
     app.canGold = True
     app.canDiamond = True
     app.canCoal = True
-    app.canLantern = False
+    app.canLantern = True
     app.lakeRowsAndCols = []
 
     app.time = 0 #keeps track of the world time
@@ -73,36 +75,68 @@ def mousePressed(app, event):
 
     elif app.drawLine: # we are in the mode of adding elements to the board
         coords = (get3DPointsAroundPoint(app, event.x, event.y)) 
+
         timeCreated = app.time
-        if app.mode == "r": #rock
-            element = worldElements.Rock(coords, timeCreated)
-        elif app.mode == 'p': #plant
-            element = worldElements.Plant(coords, timeCreated)
-        elif  app.mode == 'd': #dirt
-            element = worldElements.Dirt(coords, timeCreated)
-        elif  app.mode == 't': #tree
-            element = worldElements.Tree(coords, timeCreated)
-        elif  app.mode == 's': #seed
-            element = worldElements.Seed(coords, timeCreated)
-        elif  app.mode == 'f': #flower
-            element = worldElements.Flower(coords, timeCreated)
-        elif  app.mode == 'o': #fruit
-            element = worldElements.Fruit(coords, timeCreated)
-        elif app.mode == 'm': #steel
-            element = worldElements.Steel(coords, timeCreated)
-        elif app.mode == '0': #iron
-            element = worldElements.Tool(coords, timeCreated)
-        elif app.mode == '1': #iron
-            element = worldElements.Iron(coords, timeCreated)
-        elif app.mode == '2': #coal
-            element = worldElements.Coal(coords, timeCreated)
-        elif app.mode == '3': #diamond
-            element = worldElements.Diamond(coords, timeCreated)
-        elif app.mode == '4': #gold
-            element = worldElements.Gold(coords, timeCreated)
-        elif app.mode == '5': #lantern
-            element = worldElements.Lantern(coords, timeCreated)
-        app.worldElementList.append(element)      
+        if coords != None:
+            if app.mode == "r": #rock
+                element = worldElements.Rock(coords, timeCreated)
+            elif app.mode == 'p': #plant
+                element = worldElements.Plant(coords, timeCreated)
+            elif  app.mode == 'd': #dirt
+                element = worldElements.Dirt(coords, timeCreated)
+            elif  app.mode == 't': #tree
+                element = worldElements.Tree(coords, timeCreated)
+            elif  app.mode == 's': #seed
+                element = worldElements.Seed(coords, timeCreated)
+            elif  app.mode == 'f': #flower
+                element = worldElements.Flower(coords, timeCreated)
+            elif  app.mode == 'o': #fruit
+                element = worldElements.Fruit(coords, timeCreated)
+            elif app.mode == 'm': #steel
+                element = worldElements.Steel(coords, timeCreated)
+            elif app.mode == '0': #iron
+                element = worldElements.Tool(coords, timeCreated)
+            elif app.mode == '1': #iron
+                element = worldElements.Iron(coords, timeCreated)
+            elif app.mode == '2': #coal
+                element = worldElements.Coal(coords, timeCreated)
+            elif app.mode == '3': #diamond
+                element = worldElements.Diamond(coords, timeCreated)
+            elif app.mode == '4': #gold
+                element = worldElements.Gold(coords, timeCreated)
+            elif app.mode == '5': #lantern
+                element = worldElements.Lantern(coords, timeCreated)
+            app.worldElementList.append(element)    
+        elif (event.x%28 !=0 or (event.x//28)%2 ==1) and event.y > 570 and event.y < 600:
+            buttonNum = event.x//28 
+            print(buttonNum)
+            if buttonNum == 1: app.mode = "r"  
+
+            if buttonNum == 3: app.mode = "p"
+
+            if buttonNum == 5 and app.canDirt: app.mode = "d"
+
+            if buttonNum == 7 and app.canTree: app.mode = "t"
+
+            if buttonNum == 9 and app.canSeed: app.mode = "s"
+
+            if buttonNum == 11 and app.canFlower: app.mode = "f"
+
+            if buttonNum == 13 and app.canFruit: app.mode = "o"
+        
+            if buttonNum == 15 and app.canSteel: app.mode = "m"  
+            
+            if buttonNum == 17 and app.canTool: app.mode = "0" 
+
+            if buttonNum == 19 and app.canIron: app.mode = "1"
+
+            if buttonNum == 21 and app.canDiamond: app.mode = "3"
+
+            if buttonNum == 23 and app.canCoal: app.mode = "2" 
+
+            if buttonNum == 25 and app.canLantern: app.mode = "5" 
+        else:
+            print(event.x, event.y)
 
 def keyPressed(app, event):
     #pause the diffusion
@@ -111,6 +145,7 @@ def keyPressed(app, event):
 
     #leave diffusion board go to 3D terrain
     if event.key == "g" and not app.drawLine:
+        print("IN here")
         transformPoints(app)
         app.drawLine = True
 
@@ -182,8 +217,13 @@ def keyPressed(app, event):
         if not app.canSeed:
             print("Seeds isn't in the recipe book! Get creative lmao")
         else:
-            print("here seed")
             app.mode = "s"
+    
+    elif event.key == "l":
+        if not app.canLantern:
+            print("Try the ores!")
+        else: 
+            app.mode = "5"
     
 #checks to see if a move in a particular direction is still on the board
 def neighborExists(app, direction, row, col):
@@ -276,7 +316,6 @@ def getCellBounds(app, row, col):
 
 #given x,y on the window, it will return the points in threeDpoints that surround the click
 def get3DPointsAroundPoint(app, x, y):
-
     for row in range(len(app.threeDPoints)-1):
         for col in range(len(app.threeDPoints[0])-1):                          
             if projectionOperations.insidePolygon(app.threeDPoints[row][col], \
@@ -290,6 +329,17 @@ def get3DPointsAroundPoint(app, x, y):
 #from 15112 class website https://www.cs.cmu.edu/~112/notes/notes-graphics.html
 def rgbString(r, g, b):
     return f'#{r:02x}{g:02x}{b:02x}'
+
+def drawBoids(app, canvas):
+    for boid in app.biodList:
+        x = boid.pos[0]
+        y = boid.pos[1]
+        canvas.create_oval(x -2, y-2, x+2, y+2)
+        
+def drawTopButtons(canvas, width, height, number, color):
+    start = width*(2*(number-1)+1)/30
+    end = width*(2*(number))/30
+    canvas.create_rectangle(start, height*5/7, end, height*5/7+30, fill= color)
 
 #creates the grid and the numbers
 def drawBoard(app, canvas):
@@ -309,6 +359,20 @@ def drawBoard(app, canvas):
         for index, element in enumerate(app.worldElementList):
             element.drawElement(canvas, app) #the coordinates are 4 sets of row and col
        
+        #buttons
+        drawTopButtons(canvas, app.width, app.height, 1, "gray") #rock 1
+        drawTopButtons(canvas, app.width, app.height, 2, "green") #plant 3
+        drawTopButtons(canvas, app.width, app.height, 3, "tan") #dirt 5
+        drawTopButtons(canvas, app.width, app.height, 4, "dark green") #tree 7
+        drawTopButtons(canvas, app.width, app.height, 5, "red") #seed 9
+        drawTopButtons(canvas, app.width, app.height, 6, "gold") #flower 11 
+        drawTopButtons(canvas, app.width, app.height, 7, "orchid1") #fruit 13  
+        drawTopButtons(canvas, app.width, app.height, 8, "lightblue3") #steel 15       
+        drawTopButtons(canvas, app.width, app.height, 9, "slateblue2") #tool 17 
+        drawTopButtons(canvas, app.width, app.height, 10, "lavenderblush2") #iron 19 
+        drawTopButtons(canvas, app.width, app.height, 11, "cyan") #diamond 21
+        drawTopButtons(canvas, app.width, app.height, 12, "black") #coal 23
+        drawTopButtons(canvas, app.width, app.height, 13, "goldenrod1") #gold 25 
         '''
         starChance = random.randrange(1, 101, 1)
         if starChance <= 50:
@@ -317,15 +381,13 @@ def drawBoard(app, canvas):
             StarShower.drawStarShower(canvas, 4, starX, starY, 100, 4)
         '''
 
-#checking surroundings of all elements
-def checkSurroundingOfAllElements(app):
+#checking surroundings, time of all elements, move animals
+def checkAllElements(app):
     for element in app.worldElementList:
             element.checkSurrounding(app)
-
-#updates all cells based on time related interactions
-def checkTimeOfAllElements(app):
-    for element in app.worldElementList:
-        element.checkTime(app)
+            element.checkTime(app)
+            if isinstance(element, worldElements.Rabbit):
+                element.move(app)
 
 #drawing the lines of the contour plot
 def drawLine(canvas, app):
@@ -383,10 +445,12 @@ def oneDiffuse(app):
 def timerFired(app):
     if not app.drawLine and not app.pause:
         grayScottRD(app)
+        app.iter += 1
+        if app.iter % 50 == 0:
+            print("iteration ", app.iter)
 
     if app.drawLine:
-        checkSurroundingOfAllElements(app)
-        checkTimeOfAllElements(app)
+        checkAllElements(app)
     app.time += 1 
 
 #refreshes the canvas each time
@@ -407,6 +471,7 @@ def grayScottyBoy():
 def main():
     grayScottyBoy()
     master = Tk()
+ 
 
 if __name__ == '__main__':
-    main()
+    main() 
