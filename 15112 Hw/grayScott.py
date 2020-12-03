@@ -335,7 +335,7 @@ def drawBoids(app, canvas):
         x = boid.pos[0]
         y = boid.pos[1]
         canvas.create_oval(x -2, y-2, x+2, y+2)
-        
+
 def drawTopButtons(canvas, width, height, number, color):
     start = width*(2*(number-1)+1)/30
     end = width*(2*(number))/30
@@ -354,7 +354,7 @@ def drawBoard(app, canvas):
     else:
         #draw the contour plot
         drawLine(canvas, app)
-        
+        drawBoids(app, canvas)
         #draw all elements
         for index, element in enumerate(app.worldElementList):
             element.drawElement(canvas, app) #the coordinates are 4 sets of row and col
@@ -451,6 +451,9 @@ def timerFired(app):
 
     if app.drawLine:
         checkAllElements(app)
+        for boid in app.biodList:
+            boid.move(app)
+            boid.wrapAround(app)
     app.time += 1 
 
 #refreshes the canvas each time

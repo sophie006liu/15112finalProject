@@ -492,11 +492,11 @@ class Bird(worldElement):
         canvas.create_oval(baseX, baseY-10, baseX+2, baseY + 1, fill = "orange")
 
     def checkTime(self, app):
-        if self.timeCreated - app.time > 2:
+        if app.time - self.timeCreated > 2:
             app.worldElementList.remove(self)
-            biod  = Boid(10+ random.randrange (app.width-10), 10 + random.randrange (app.height-10))
+            biod  = BoidTest.Boid(10+ random.randrange (app.width-10), 10 + random.randrange (app.height-10))
             app.biodList.append(biod)
-            
+
 
 class Cow(worldElement):
     def __init__(self, coords, time):
