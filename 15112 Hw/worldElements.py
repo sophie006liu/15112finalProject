@@ -423,15 +423,16 @@ class Tree(worldElement):
         #over time the tree will spawn an animal
         if (app.time - self.timeCreated > 2) and not self.spawnedAnimal:
             num = random.randrange(1, 4, 1)
-            newCoords = copy.deepcopy(self.coords)
-            animal = Bird(newCoords, app.time)
-            #animal = None
-            #if num == 1:
-                #animal = Rabbit(self.coords, app.time)
-            # elif num == 2:
-            #     animal = Cow(self.coords, app.time)
-            # elif num == 3:
-            #     animal = Bird(self.coords, app.time)
+            newCoords = copy.deepcopy(self.coords) 
+            animal = None
+            if num == 1:
+                newCoords = copy.deepcopy(self.coords)
+                animal = Rabbit(newCoords, app.time)
+            elif num == 2:
+                newCoords = copy.deepcopy(self.coords)
+                animal = Cow(newCoords, app.time)
+            elif num == 3:
+                animal = Bird(self.coords, app.time)
             app.worldElementList.append(animal)
             self.spawnedAnimal = True
 
@@ -519,12 +520,13 @@ class Cow(worldElement):
         canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "gainsboro")
     
     def move(self, app):
-        timeDiff = (app.time - self.timeCreated)%100
-        if self.switch and timeDiff == 0:
+        timeDiff = app.time - self.timeCreated
+        if self.switch and timeDiff%70 == 0 :
+            print("in here")
             for point in self.coords:
                 point[0] += 1
             self.switch = not self.switch
-        elif timeDiff == 0 and not self.switch:
+        elif timeDiff%70 == 0 and not self.switch:
             for point in self.coords:
                 point[0] -= 1
             self.switch = not self.switch
@@ -555,7 +557,7 @@ class Seed(worldElement):
         canvas.create_oval(base2X-2, base2Y-2, base2X+2, base2Y+2, fill = "OrangeRed3")
     
     def checkTime(self, app): 
-        if (app.time - self.timeCreated > 2) and self.inGarden: 
+        if (app.time - self.timeCreated > 20) and self.inGarden: 
             flower = Flower(self.coords, app.time, True)   
             app.worldElementList.append(flower)
             app.canFlower = True
@@ -583,7 +585,7 @@ class Flower(worldElement):
         canvas.create_oval(baseX-5, baseY-5, baseX+5, baseY+5, fill = "gold")
 
     def checkTime(self, app): 
-        if (app.time - self.timeCreated > 2) and self.inGarden: 
+        if (app.time - self.timeCreated > 50) and self.inGarden: 
             fruit = Fruit(self.coords, app.time, True)   
             app.worldElementList.append(fruit)
             app.canFruit = True
