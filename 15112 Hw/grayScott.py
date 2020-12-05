@@ -3,6 +3,12 @@ import math, copy, random, projectionOperations, worldElements, BoidTest, DayNig
 
 #stpres app variables
 def appStarted(app):
+    app.image1 = app.loadImage("splashTitle.png")
+    app.image2 = app.loadImage("splash2.png")
+    app.start = True 
+    app.start2 = False
+    app.gridMode = False
+
     app.drawLine = False #dictates whether gray scott phase or world creation phase
     app.rows, app.cols, app.cellSize, app.margin = gameDimensions()
 
@@ -71,7 +77,14 @@ def seedB(app, r, c):
 
 
 def mousePressed(app, event):
-    if not app.drawLine:
+    if app.start: 
+        app.start = False 
+        app.start2 = True
+    elif app.start2:
+        app.gridMode = True
+        app.start2 = False
+        print("in here")
+    elif app.gridMode:
         #if the user clicks then they drop a seed into the diffusing board
         rows = event.y // app.cellSize
         cols = event.x // app.cellSize 
@@ -345,15 +358,19 @@ def drawTopButtons(canvas, width, height, number, color):
 
 #creates the grid and the numbers
 def drawBoard(app, canvas):
-    if not app.drawLine:
+    if app.start:
+        canvas.create_image(400, 400, image=ImageTk.PhotoImage(app.image1))
+    elif app.start2: 
+        canvas.create_image(400, 400, image=ImageTk.PhotoImage(app.image2))
+    elif not app.drawLine and not app.start and not app.start2:
         for row in range(app.rows):
-            for col in range(app.cols):
-                scaleRed = min(255, app.boardA[row][col] * 127 + 127)
+            for col in range(app.cols): 
+                scaleBlue= min(255, app.boardA[row][col] * 127 + 127)
                 scaleGreen = min(255, app.boardB[row][col] * 127 + 127)
-                color = rgbString(int(scaleRed), int(scaleGreen), 0)
+                color = rgbString(1, int(scaleGreen), int(scaleBlue))
                 x0, y0, x1, y1 = getCellBounds(app, row, col)
                 canvas.create_rectangle(x0,y0, x1, y1, fill = color) 
-    else:
+    elif app.drawLine and not app.start:
         DayNight.drawBackGround(canvas, app)
         if app.cloudStart:
             for cloud in app.cloudList:
@@ -485,7 +502,7 @@ def timerFired(app):
 
     #chance of clouds
     chance = random.randrange(1, 100, 1)
-    if chance>= 1 and chance <=40 and app.cloudStart == 0:
+    if chance>= 1 and chance <=40 and app.cloudStart == 0 and app.drawLine:
         numberClouds = random.randrange(5, 20, 1)
         for i in range(numberClouds):
             x = random.randrange(1, app.width, 1)
@@ -494,12 +511,13 @@ def timerFired(app):
             colors = ["royalBlue4", "dodgerBlue4", "skyblue4"] 
             color = random.choice(colors)
             size = random.randrange(20, 70, 1)
-            smallSize = random.randrange(int(size/5), size/2, 1)
+            smallSize = random.randrange(int(size/5), int(size/2), 1)
             midSize = random.randrange(int(size/3), int(size*4/5), 1)
             cloud = DayNight.Cloud(x, y, size, color, smallSize, midSize)
             app.cloudList.append(cloud)
         app.cloudStart = app.time
 
+    #keeping track of the time the clouds have been present
     if app.time - app.cloudStart > 200:
         app.cloudStart = 0
         app.cloudList = [] 
