@@ -163,6 +163,7 @@ def keyPressed(app, event):
     if event.key == "g" and not app.drawLine:
         transformPoints(app)
         app.drawLine = True
+        app.gridMode = False
 
     #switch to rock mode and/or plant mode
     if event.key == "r" or (event.key == "p" and app.drawLine):
