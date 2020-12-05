@@ -13,13 +13,12 @@ def drawBackGround(canvas, app):
     b = int(2.18804*time + 35.15009)
     color = rgbString(r,g,b)
     canvas.create_rectangle(0,0, app.width, app.height, fill = color)
-    drawStars(canvas, app)
+    if app.time != 0 and (app.time-200)%600 < 150: 
+        drawStars(canvas, app)
 
 def drawStars(canvas, app):
-    numberStars = random.randrange(20, 40, 1)
-    for i in range(numberStars):
-        x = random.randrange(7, app.width, 7)
-        y = random.randrange(7, app.height, 7)
+    for star in app.stars:
+        x, y= star[0], star[1]
         size = random.randrange(7, 21, 1)
         pixel = size/7
         hx1, hx2, hy1, hy2 = x-(size/2), x+(size/2), y-(pixel/2), y+(pixel/2)
@@ -28,6 +27,36 @@ def drawStars(canvas, app):
         vx2 = x+(pixel/2)
         vy1 = y-(pixel*9/2)
         vy2 = y+(pixel*9/2)
-        canvas.create_rectangle(hx1, hy1, hx2, hy2, fill = "white")
-        canvas.create_rectangle(sx1, sy1, sx2, sy2, fill = "white")
-        canvas.create_rectangle(vx1, vy1, vx2, vy2, fill = "white") 
+        canvas.create_rectangle(hx1, hy1, hx2, hy2, fill = "white", width = 0)
+        canvas.create_rectangle(sx1, sy1, sx2, sy2, fill = "white", width = 0)
+        canvas.create_rectangle(vx1, vy1, vx2, vy2, fill = "white", width = 0) 
+
+class Cloud(object):
+    def __init__(self, x, y, size, color, smallSize, midSize):
+        self.x = x
+        self.y = y
+        self.size = size
+        self.color = color
+        self.smallSize = smallSize
+        self.midSize = midSize
+
+    def drawCloud(self, canvas, app):
+        #Big rect
+        x, y = self.x, self.y
+        size, smallSize, midSize = self.size, self.smallSize, self.midSize
+
+        bx2, by2 = x+size, y+size
+        #little left rectangle
+        sx1, sy1 = x-smallSize, y+size-smallSize
+        sx2, sy2 = x, by2
+        #middle sized right rectangle
+        mx1, my1 = bx2, y+size-midSize
+        mx2, my2 = bx2+midSize, by2
+        canvas.create_rectangle(x, y, bx2, by2, fill = self.color, width = 0)
+        canvas.create_rectangle(sx1, sy1, sx2, sy2, fill = self.color, width = 0)
+        canvas.create_rectangle(mx1, my1, mx2, my2, fill = self.color, width = 0) 
+
+
+
+
+    

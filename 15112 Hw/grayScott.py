@@ -43,7 +43,11 @@ def appStarted(app):
 
     app.time = 0 #keeps track of the world time 
     app.pause = False #for debugging purposes
-
+    
+    app.stars = []
+    app.setStars = False
+    app.cloudList = []
+    app.cloudStart = 0 
 #make2dlist taken from class
 def make2dList(rows, cols, defVal = 0.0):
         return [([defVal] * cols) for row in range(rows)]
@@ -135,7 +139,7 @@ def mousePressed(app, event):
 
             if buttonNum == 25 and app.canLantern: app.mode = "5" 
         else:
-            print(event.x, event.y)
+            print(app.time)
 
 def keyPressed(app, event):
     #pause the diffusion
@@ -350,8 +354,11 @@ def drawBoard(app, canvas):
                 x0, y0, x1, y1 = getCellBounds(app, row, col)
                 canvas.create_rectangle(x0,y0, x1, y1, fill = color) 
     else:
-        #draw the contour plot
         DayNight.drawBackGround(canvas, app)
+        if app.cloudStart:
+            for cloud in app.cloudList:
+                cloud.drawCloud(canvas, app)
+        #draw the contour plot
         drawLine(canvas, app)
         drawBoids(app, canvas)
         #draw all elements
@@ -457,11 +464,46 @@ def timerFired(app):
         grayScottRD(app)
         app.iter += 1
 
-    if app.drawLine:
+    if app.drawLine: 
         checkAllElements(app)
         for boid in app.biodList:
             boid.move(app)
             boid.wrapAround(app)
+
+    if app.time != 0 and (app.time-200)%600 < 150:
+        if not app.setStars:
+            numberStars = random.randrange(20, 40, 1)
+            for i in range(numberStars):
+                x = random.randrange(7, app.width, 7)
+                y = random.randrange(7, app.height, 7)
+                tup = (x,y)
+                app.stars.append(tup)
+            app.setStars = True
+    if (app.time-200)%600 >= 150 and app.setStars:
+        app.setStars = False
+        app.stars = []
+
+    #chance of clouds
+    chance = random.randrange(1, 100, 1)
+    if chance>= 1 and chance <=40 and app.cloudStart == 0:
+        numberClouds = random.randrange(5, 20, 1)
+        for i in range(numberClouds):
+            x = random.randrange(1, app.width, 1)
+            y = random.randrange(1, app.height, 1)
+
+            colors = ["royalBlue4", "dodgerBlue4", "skyblue4"] 
+            color = random.choice(colors)
+            size = random.randrange(20, 70, 1)
+            smallSize = random.randrange(int(size/5), size/2, 1)
+            midSize = random.randrange(int(size/3), int(size*4/5), 1)
+            cloud = DayNight.Cloud(x, y, size, color, smallSize, midSize)
+            app.cloudList.append(cloud)
+        app.cloudStart = app.time
+
+    if app.time - app.cloudStart > 200:
+        app.cloudStart = 0
+        app.cloudList = [] 
+
     app.time += 1 
 
 #refreshes the canvas each time
