@@ -1,5 +1,5 @@
 from cmu_112_graphics import * #graphics package taken from class
-import math, copy, random, projectionOperations, worldElements, BoidTest#, StarShower don't need this yet/it can't work lol
+import math, copy, random, projectionOperations, worldElements, BoidTest, DayNight#, StarShower don't need this yet/it can't work lol
 
 #stpres app variables
 def appStarted(app):
@@ -13,7 +13,7 @@ def appStarted(app):
     if not app.drawLine:
         app.timerDelay = 1
     else:
-        app.timerDelay = 10000
+        app.timerDelay = 100000
 
     app.iter = 0
     app.dA = 0.2    #the A diffusion percentage to adjacent cells
@@ -41,7 +41,7 @@ def appStarted(app):
     app.canLantern = False
     app.lakeRowsAndCols = []
 
-    app.time = 0 #keeps track of the world time
+    app.time = 0 #keeps track of the world time 
     app.pause = False #for debugging purposes
 
 #make2dlist taken from class
@@ -351,6 +351,7 @@ def drawBoard(app, canvas):
                 canvas.create_rectangle(x0,y0, x1, y1, fill = color) 
     else:
         #draw the contour plot
+        DayNight.drawBackGround(canvas, app)
         drawLine(canvas, app)
         drawBoids(app, canvas)
         #draw all elements
