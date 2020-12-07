@@ -360,15 +360,16 @@ def drawTopButtons(canvas, width, height, number, color, label):
 #creates the grid and the numbers
 def drawBoard(app, canvas):
     if app.start:
+        canvas.create_rectangle(0,0, app.width, app.height, fill = rgbString(0, 149,240))
         canvas.create_image(400, 400, image=ImageTk.PhotoImage(app.image1))
     elif app.start2: 
         canvas.create_image(400, 400, image=ImageTk.PhotoImage(app.image2))
     elif not app.drawLine and not app.start and not app.start2:
         for row in range(app.rows):
             for col in range(app.cols): 
-                scaleBlue= min(255, app.boardA[row][col] * 127 + 127)
-                scaleGreen = min(255, app.boardB[row][col] * 127 + 127)
-                color = rgbString(1, int(scaleGreen), int(scaleBlue))
+                scaleBlue= min(255, app.boardA[row][col] * 60 + 177)
+                scaleGreen = min(255, app.boardB[row][col] * 60 + 177)
+                color = rgbString(100, int(scaleGreen), int(scaleBlue))
                 x0, y0, x1, y1 = getCellBounds(app, row, col)
                 canvas.create_rectangle(x0,y0, x1, y1, fill = color) 
     elif app.drawLine and not app.start:
