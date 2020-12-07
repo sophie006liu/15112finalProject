@@ -5,6 +5,8 @@ import math, copy, random, projectionOperations, worldElements, BoidTest, DayNig
 def appStarted(app):
     app.image1 = app.loadImage("splashTitle.png")
     app.image2 = app.loadImage("splash2.png")
+    app.image3 = app.loadImage("directions.png")
+    app.image4 = app.scaleImage(app.image3, 1/2)
     app.start = True 
     app.start2 = False
     app.gridMode = False
@@ -34,7 +36,7 @@ def appStarted(app):
 
     app.mode = "r" #what element they are currently placing
     app.canDirt = False  #keeps track of all the elements that have been unlocked
-    app.canTree = False
+    app.canTree = True
     app.canSeed = False
     app.canFlower = False
     app.canFruit = False
@@ -75,15 +77,13 @@ def seedB(app, r, c):
                     newCol = c + dCol
                     app.boardB[newRow][newCol] = 1
 
-
 def mousePressed(app, event):
     if app.start: 
         app.start = False 
         app.start2 = True
     elif app.start2:
         app.gridMode = True
-        app.start2 = False
-        print("in here")
+        app.start2 = False 
     elif app.gridMode:
         #if the user clicks then they drop a seed into the diffusing board
         rows = event.y // app.cellSize
@@ -111,7 +111,7 @@ def mousePressed(app, event):
                 element = worldElements.Fruit(coords, timeCreated)
             elif app.mode == 'm': #steel
                 element = worldElements.Steel(coords, timeCreated)
-            elif app.mode == '0': #iron
+            elif app.mode == '0': #tool
                 element = worldElements.Tool(coords, timeCreated)
             elif app.mode == '1': #iron
                 element = worldElements.Iron(coords, timeCreated)
@@ -352,11 +352,11 @@ def drawBoids(app, canvas):
         y = boid.pos[1]
         canvas.create_oval(x -2, y-2, x+2, y+2, "orange")
 
-def drawTopButtons(canvas, width, height, number, color):
+def drawTopButtons(canvas, width, height, number, color, label):
     start = width*(2*(number-1)+1)/30
     end = width*(2*(number))/30
     canvas.create_rectangle(start, height*5/7, end, height*5/7+30, fill= color)
-
+    canvas.create_text(int((start+end)/2), height*5/7+15,  text = label, fill = "white", font="Arial 12 bold")
 #creates the grid and the numbers
 def drawBoard(app, canvas):
     if app.start:
@@ -373,6 +373,7 @@ def drawBoard(app, canvas):
                 canvas.create_rectangle(x0,y0, x1, y1, fill = color) 
     elif app.drawLine and not app.start:
         DayNight.drawBackGround(canvas, app)
+        canvas.create_image(app.width*3/4, app.height*3/4, image=ImageTk.PhotoImage(app.image4))
         if app.cloudStart:
             for cloud in app.cloudList:
                 cloud.drawCloud(canvas, app)
@@ -384,30 +385,30 @@ def drawBoard(app, canvas):
             element.drawElement(canvas, app) #the coordinates are 4 sets of row and col
        
         #buttons
-        drawTopButtons(canvas, app.width, app.height, 1, "gray") #rock 1
-        drawTopButtons(canvas, app.width, app.height, 2, "green") #plant 3
+        drawTopButtons(canvas, app.width, app.height, 1, "gray", "rock/r") #rock 1
+        drawTopButtons(canvas, app.width, app.height, 2, "green", "plant/p") #plant 3
         if app.canDirt:
-            drawTopButtons(canvas, app.width, app.height, 3, "tan") #dirt 5
+            drawTopButtons(canvas, app.width, app.height, 3, "tan", "dirt/d") #dirt 5
         if app.canTree:
-            drawTopButtons(canvas, app.width, app.height, 4, "dark green") #tree 7
+            drawTopButtons(canvas, app.width, app.height, 4, "dark green", "tree/t") #tree 7
         if app.canSeed:
-            drawTopButtons(canvas, app.width, app.height, 5, "red") #seed 9
+            drawTopButtons(canvas, app.width, app.height, 5, "red", "seed/s") #seed 9
         if app.canFlower:   
-            drawTopButtons(canvas, app.width, app.height, 6, "gold") #flower 11 
+            drawTopButtons(canvas, app.width, app.height, 6, "gold", "flower/f") #flower 11 
         if app.canFruit:    
-            drawTopButtons(canvas, app.width, app.height, 7, "orchid1") #fruit 13  
+            drawTopButtons(canvas, app.width, app.height, 7, "orchid1", "fruit/o") #fruit 13  
         if app.canSteel:
-            drawTopButtons(canvas, app.width, app.height, 8, "lightblue3") #steel 15       
+            drawTopButtons(canvas, app.width, app.height, 8, "lightblue3", "steel/m") #steel 15       
         if app.canTool:    
-            drawTopButtons(canvas, app.width, app.height, 9, "slateblue2") #tool 17 
+            drawTopButtons(canvas, app.width, app.height, 9, "slateblue2", "tool/0") #tool 17 
         if app.canIron:
-            drawTopButtons(canvas, app.width, app.height, 10, "lavenderblush2") #iron 19 
+            drawTopButtons(canvas, app.width, app.height, 10, "lavenderblush2", "iron/1") #iron 19 
         if app.canDiamond:    
-            drawTopButtons(canvas, app.width, app.height, 11, "cyan") #diamond 21
+            drawTopButtons(canvas, app.width, app.height, 11, "cyan", "diamond/3") #diamond 21
         if app.canCoal:   
-            drawTopButtons(canvas, app.width, app.height, 12, "black") #coal 23
+            drawTopButtons(canvas, app.width, app.height, 12, "black", "coal/2") #coal 23
         if app.canGold:   
-            drawTopButtons(canvas, app.width, app.height, 13, "goldenrod1") #gold 25 
+            drawTopButtons(canvas, app.width, app.height, 13, "goldenrod1", "gold/4") #gold 25 
         '''
         starChance = random.randrange(1, 101, 1)
         if starChance <= 50:
@@ -421,7 +422,7 @@ def checkAllElements(app):
     for element in app.worldElementList:
         element.checkSurrounding(app)
         element.checkTime(app)
-        if isinstance(element, worldElements.Rabbit) or isinstance(element, worldElements.Cow):
+        if isinstance(element, worldElements.Rabbit) or isinstance(element, worldElements.Cow) or isinstance(element, worldElements.Dog):
                 element.move(app)
 
 #drawing the lines of the contour plot

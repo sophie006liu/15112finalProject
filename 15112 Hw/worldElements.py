@@ -1,6 +1,6 @@
 
 from cmu_112_graphics import *
-import math, copy, random, projectionOperations, BoidTest
+import math, copy, random, projectionOperations, BoidTest, astarPseudo
 
 class worldElement(object):
     #each element is a kind of element (tree, dirt, etc) 
@@ -426,22 +426,24 @@ class Tree(worldElement):
         if (app.time - self.timeCreated > 2) and not self.spawnedAnimal:
             num = random.randrange(1, 4, 1)
             newCoords = copy.deepcopy(self.coords) 
-            animal = None
-            if num == 1:
-                newCoords = copy.deepcopy(self.coords)
-                animal = Rabbit(newCoords, app.time)
-            elif num == 2:
-                newCoords = copy.deepcopy(self.coords)
-                animal = Cow(newCoords, app.time)
-            elif num == 3:
-                animal = Bird(self.coords, app.time)
+            animal = Rabbit(newCoords, app.time)
+            #animal = None     
+            # if num == 1:
+            #     newCoords = copy.deepcopy(self.coords)
+            #     animal = Rabbit(newCoords, app.time)
+            # elif num == 2:
+            #     newCoords = copy.deepcopy(self.coords)
+            #     animal = Cow(newCoords, app.time)
+            # elif num == 3:
+            #     animal = Bird(self.coords, app.time)
             app.worldElementList.append(animal)
             self.spawnedAnimal = True
 
 class Rabbit(worldElement):
     def __init__(self, coords, time):
         super().__init__(coords, time)
-       
+        self.spawnedDog = False
+
     def drawElement(self, canvas, app):
         pt1R, pt1C = self.coords[0]
         pt2R, pt2C = self.coords[1]
@@ -471,6 +473,22 @@ class Rabbit(worldElement):
             for point in self.coords:
                 point[0] += dx
                 point[1] += dy 
+
+    def checkTime(self, app): 
+        if not self.spawnedDog and (app.time - self.timeCreated > 0): 
+            availableCoords = [] 
+            for i in range(app.rows - 2):
+                for j in range(app.cols - 2):
+                    if [i,j] in app.lakeRowsAndCols:
+                        continue
+                    else:
+                        availableCoords.append((i,j))
+            randomCoord = random.choice(availableCoords)
+            row = randomCoord[0]
+            col = randomCoord[1]
+            dog = Dog([  [row, col], [row+1, col] , [row+1,col+1],  [row,col+1] ], app.time)   
+            app.worldElementList.append(dog)
+            self.spawnedDog = True 
 
 class Bird(worldElement):
     def __init__(self, coords, time):
@@ -534,8 +552,10 @@ class Cow(worldElement):
 class Dog(worldElement):
     def __init__(self, coords, time):
         super().__init__(coords, time)
-        self.switch = True
-       
+        self.eat = False
+        self.target = None
+        self.lastTCoords = []
+        self.path = []
     def drawElement(self, canvas, app):
         pt1R, pt1C = self.coords[0]
         pt2R, pt2C = self.coords[1]
@@ -549,20 +569,51 @@ class Dog(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_rectangle(baseX-9, baseY+2, baseX, baseY + 6, fill = "gainsboro")
         canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "gainsboro")
-    
+
     def move(self, app):
-        timeDiff = app.time - self.timeCreated
-        if self.switch and timeDiff%70 == 0 :
-            print("in here")
-            for point in self.coords:
-                point[0] += 1
-            self.switch = not self.switch
-        elif timeDiff%70 == 0 and not self.switch:
-            for point in self.coords:
-                point[0] -= 1
-            self.switch = not self.switch
-            
+        if not self.eat: 
+            if self.target == None:
+                for thing in app.worldElementList:
+                    if isinstance(thing, Rabbit):
+                        self.target = thing
+                        self.lastTCoords = thing.coords[0]
+                selfCoord = (self.coords[0][0],self.coords[0][1])
+                targetCoord = (self.target.coords[0][0],self.target.coords[0][1])
+                self.path = astarPseudo.aStarSearch(selfCoord, targetCoord, app)
+                nextMove = self.path[1]
+                newDirection = [nextMove[0] - selfCoord[0], nextMove[1] - selfCoord[1]] 
+                for coord in self.coords:
+                    coord[0] += newDirection[0]
+                    coord[1] += newDirection[1]
+                self.path = self.path[2:]
+            elif self.target!= None and len(self.path) == 0: #reached end of path
+                app.worldElementList.remove(self.target)
+                self.eat = True
+                self.target = None
+
+            elif self.target.coords[0] == self.lastTCoords:
+                selfCoord = (self.coords[0][0],self.coords[0][1])
+                nextMove = self.path[0]
+                newDirection = [nextMove[0] - selfCoord[0], nextMove[1] - selfCoord[1]] 
+                for coord in self.coords:
+                    coord[0] += newDirection[0]
+                    coord[1] += newDirection[1]
+                self.path = self.path[1:]
+            else:
+                selfCoord = (self.coords[0][0],self.coords[0][1])
+                targetCoord = (self.target.coords[0][0],self.target.coords[0][1])
+                self.path = astarPseudo.aStarSearch(selfCoord, targetCoord, app)
+                nextMove = self.path[0]
+                newDirection = [nextMove[0] - selfCoord[0], nextMove[1] - selfCoord[1]] 
+                for coord in self.coords:
+                    coord[0] += newDirection[0]
+                    coord[1] += newDirection[1]
+                self.path = self.path[1:]
+
+        
+
 class Seed(worldElement):
     def __init__(self, coords, time, gardenStatus = False):
         super().__init__(coords, time)

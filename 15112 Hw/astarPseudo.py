@@ -41,7 +41,7 @@ def build_path(coordItem):
         cur = cur.parent
     return path[::-1]
 
-def aStarSearch(selfCoord, targetCoord, grid):
+def aStarSearch(selfCoord, targetCoord, app):
     # 1Initialize the open list all the available options
     start = CoordItem(selfCoord, 0, 0, None)
     openList = []
@@ -57,10 +57,10 @@ def aStarSearch(selfCoord, targetCoord, grid):
         for direction in directions: 
             newRow = coordItem.coord[0] + direction[0]
             newCol = coordItem.coord[1] + direction[1] 
-            if (newRow >= len(grid)) or newCol >= len(grid[0]):
+            if (newRow >= app.rows) or (newCol >= app.cols):
                 continue
 
-            if grid[newRow][newCol] == 1:  # the cell is blocked
+            if [newRow,newCol] in app.lakeRowsAndCols:  # the cell is blocked
                 closedDict[(newRow, newCol)] = 100000000
                 continue
 
@@ -109,9 +109,9 @@ def maxItemLength(a):
             maxLen = max(maxLen, len(str(a[row][col])))
     return maxLen
 
-grid = makeRandom2dList(10,10)
-grid[1][1] = 1
-grid[2][2] = 1
-path = aStarSearch((0,0), (9,9), grid)
-print2dList(grid)
-print(path)
+# grid = makeRandom2dList(10,10)
+# grid[1][1] = 1
+# grid[2][2] = 1
+# path = aStarSearch((0,0), (9,9), grid)
+# print2dList(grid)
+# print(path)
