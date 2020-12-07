@@ -318,11 +318,13 @@ class Plant(worldElement):
             if isinstance(element, Dirt):
                 for dirtPoint in element.coords:
                     if dirtPoint in self.coords:
-                        app.worldElementList.remove(self)
+                        try: app.worldElementList.remove(self)
+                        except: pass
                         tree = Tree(self.coords, app.time)
                         app.worldElementList.append(tree)
                         app.canTree = True
                         break
+
     #plant becomes seeds near rock 
         for element in app.worldElementList:
             if isinstance(element, Rock):
@@ -470,7 +472,6 @@ class Rabbit(worldElement):
                 point[0] += dx
                 point[1] += dy 
 
-
 class Bird(worldElement):
     def __init__(self, coords, time):
         super().__init__(coords, time)
@@ -497,7 +498,6 @@ class Bird(worldElement):
             app.worldElementList.remove(self)
             biod  = BoidTest.Boid(10+ random.randrange (app.width-10), 10 + random.randrange (app.height-10))
             app.biodList.append(biod)
-
 
 class Cow(worldElement):
     def __init__(self, coords, time):
@@ -531,7 +531,38 @@ class Cow(worldElement):
                 point[0] -= 1
             self.switch = not self.switch
 
+class Dog(worldElement):
+    def __init__(self, coords, time):
+        super().__init__(coords, time)
+        self.switch = True
+       
+    def drawElement(self, canvas, app):
+        pt1R, pt1C = self.coords[0]
+        pt2R, pt2C = self.coords[1]
+        pt3R, pt3C = self.coords[2]
+        pt4R, pt4C = self.coords[3]
 
+        pt1 = app.threeDPoints[pt1R][pt1C]
+        pt2 = app.threeDPoints[pt2R][pt2C]
+        pt3 = app.threeDPoints[pt3R][pt3C]
+        pt4 = app.threeDPoints[pt4R][pt4C]
+
+        #get the center point first
+        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "gainsboro")
+    
+    def move(self, app):
+        timeDiff = app.time - self.timeCreated
+        if self.switch and timeDiff%70 == 0 :
+            print("in here")
+            for point in self.coords:
+                point[0] += 1
+            self.switch = not self.switch
+        elif timeDiff%70 == 0 and not self.switch:
+            for point in self.coords:
+                point[0] -= 1
+            self.switch = not self.switch
+            
 class Seed(worldElement):
     def __init__(self, coords, time, gardenStatus = False):
         super().__init__(coords, time)
@@ -562,8 +593,7 @@ class Seed(worldElement):
             app.worldElementList.append(flower)
             app.canFlower = True
             app.worldElementList.remove(self)
-    
-             
+                
 class Flower(worldElement):
     def __init__(self, coords, time, inGardenStatus = False):
         super().__init__(coords, time)
