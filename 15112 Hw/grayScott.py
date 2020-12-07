@@ -350,7 +350,7 @@ def drawBoids(app, canvas):
     for boid in app.biodList:
         x = boid.pos[0]
         y = boid.pos[1]
-        canvas.create_oval(x -2, y-2, x+2, y+2)
+        canvas.create_oval(x -2, y-2, x+2, y+2, "orange")
 
 def drawTopButtons(canvas, width, height, number, color):
     start = width*(2*(number-1)+1)/30
@@ -434,14 +434,8 @@ def drawLine(canvas, app):
 
             nxtPt = app.threeDPoints[i][j + 1]
             x2 = nxtPt[0]
-            y2 = nxtPt[1]
-            #debugging purposes to get sense of board orientation
-            if (i == 0 and j == 0):
-                canvas.create_oval(x1-2, y1-2, x1+2, y1+2, fill = "red")
-            elif (i == 1 and j == 1):  
-                canvas.create_oval(x1-2, y1-2, x1+2, y1+2, fill = "blue")
-            else:
-                canvas.create_oval(x1-2, y1-2, x1+2, y1+2)
+            y2 = nxtPt[1] 
+            canvas.create_oval(x1-2, y1-2, x1+2, y1+2, fill = "white")
 
             canvas.create_line(x1,y1,x2,y2)
 
