@@ -36,7 +36,7 @@ class Boid(object):
         coherence = 6
         avg_vec = [0.0,0.0]
         total = 0
-        for biod in app.biodList:
+        for biod in app.boidList:
             if biod == self:
                 pass
             if distance(self, biod) < self.neighborhood:
@@ -54,11 +54,11 @@ class Boid(object):
         # coherence 2: go towards the center point of biodes
         x_sum = 0
         y_sum = 0
-        for biod in app.biodList:
+        for biod in app.boidList:
             x_sum += biod.pos[0]
             y_sum += biod.pos[1]
-        x_arg = x_sum/len(app.biodList)
-        y_arg = y_sum/len(app.biodList)
+        x_arg = x_sum/len(app.boidList)
+        y_arg = y_sum/len(app.boidList)
         
         x_diff = x_arg - self.pos[0]
         y_diff = y_arg - self.pos[1]
@@ -69,7 +69,7 @@ class Boid(object):
             self.vel[1] += y_diff/mag * coherence
         
         # seperation: keep some distance
-        for biod in app.biodList:
+        for biod in app.boidList:
             if biod == self:
                 pass
             dist = math.sqrt((biod.pos[0]-self.pos[0])**2 + (biod.pos[1]-self.pos[1])**2)
@@ -140,7 +140,7 @@ def redrawAll(canvas, app):
     drawBoids(canvas, app)
 
 def timerFired(app):
-    for boid in app.biodList:
+    for boid in app.boidList:
         boid.move(app)
         boid.wrapAround(app)
 

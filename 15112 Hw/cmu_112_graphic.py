@@ -393,8 +393,6 @@ class App(object):
             hash2 = getHash(app) if app._mvcCheck else None
             if (hash1 != hash2):
                 app._mvcViolation('you may not change the app state (the model) in redrawAll (the view)')
-        except:
-            print("Something went wrong")
         finally:
             app._canvas.inRedrawAll = False
         app._canvas.update()
@@ -403,13 +401,10 @@ class App(object):
         def afterFnWrapper():
             app._afterIdMap.pop(afterId, None)
             afterFn()
-
         id = app._afterIdMap.get(afterId, None)
         if ((id is None) or replace):
             if id: app._root.after_cancel(id)
             app._afterIdMap[afterId] = app._root.after(afterDelay, afterFnWrapper)
-            if afterId == "_timerFiredWrapper":
-                print("push _timerFiredWrapper")
 
     def _deferredRedrawAll(app):
         app._deferredMethodCall(afterId='deferredRedrawAll', afterDelay=100, afterFn=app._redrawAllWrapper, replace=True)
@@ -517,15 +512,9 @@ class App(object):
     @_safeMethod
     def _timerFiredWrapper(app):
         if (not app._running) or (not app._methodIsOverridden('timerFired')): return
-        print ("_timerFiredWrapper 1")
         if (not app._paused):
             app.timerFired()
-            print("_timerFiredWrapper 2")
-            try:
-                app._redrawAllWrapper()
-            except:
-                print("Exception throew in timerFiredWraper")
-            print("_timerFiredWrapper 3")
+            app._redrawAllWrapper()
         app._deferredMethodCall(afterId='_timerFiredWrapper', afterDelay=app.timerDelay, afterFn=app._timerFiredWrapper)
 
     @_safeMethod

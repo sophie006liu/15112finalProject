@@ -422,11 +422,13 @@ class Tree(worldElement):
         canvas.create_oval(baseX-5+app.changeX, baseY-10+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "dark green")
    
     def checkTime(self, app): 
+        print("print checking time of tree")
         #over time the tree will spawn an animal
-        if (app.time - self.timeCreated > 2) and not self.spawnedAnimal:
+        if (app.time - self.timeCreated > 0 and not self.spawnedAnimal):
+            print("spawning animal")
             num = random.randrange(1, 4, 1)
             newCoords = copy.deepcopy(self.coords) 
-            animal = Rabbit(newCoords, app.time)
+            animal = Bird(newCoords, app.time)
             #animal = None     
             # if num == 1:
             #     newCoords = copy.deepcopy(self.coords)
@@ -457,9 +459,9 @@ class Rabbit(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "white")
-        canvas.create_oval(baseX-2, baseY-10, baseX, baseY + 1, fill = "white")
-        canvas.create_oval(baseX, baseY-10, baseX+2, baseY + 1, fill = "white")
+        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "white")
+        canvas.create_oval(baseX-2+app.changeX, baseY-10+app.changeY, baseX+app.changeX, baseY+1+app.changeY, fill = "white")
+        canvas.create_oval(baseX+app.changeX, baseY-10+app.changeY, baseX+2+app.changeX, baseY+1+app.changeY, fill = "white")
     
     def move(self, app):
         directions = [(-1, -1), (-1, 0), (-1, 1),
@@ -507,15 +509,15 @@ class Bird(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "orange")
-        canvas.create_oval(baseX-2, baseY-10, baseX, baseY + 1, fill = "orange")
-        canvas.create_oval(baseX, baseY-10, baseX+2, baseY + 1, fill = "orange")
+        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "orange")
+        canvas.create_oval(baseX-2+app.changeX, baseY-10+app.changeY, baseX+app.changeX, baseY+1+app.changeY, fill = "orange")
+        canvas.create_oval(baseX+app.changeX, baseY-10+app.changeY, baseX+2+app.changeY, baseY+1+app.changeY, fill = "orange")
 
     def checkTime(self, app):
         if app.time - self.timeCreated > 2:
             app.worldElementList.remove(self)
             biod  = BoidTest.Boid(10+ random.randrange (app.width-10), 10 + random.randrange (app.height-10))
-            app.biodList.append(biod)
+            app.boidList.append(biod)
 
 class Cow(worldElement):
     def __init__(self, coords, time):
@@ -535,7 +537,7 @@ class Cow(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "gainsboro")
+        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeY, baseY+5++app.changeY, fill = "gainsboro")
     
     def move(self, app):
         timeDiff = app.time - self.timeCreated
@@ -569,8 +571,8 @@ class Dog(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_rectangle(baseX-9, baseY+2, baseX, baseY + 6, fill = "gainsboro")
-        canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "gainsboro")
+        canvas.create_rectangle(baseX-9+app.changeX, baseY+2+app.changeY, baseX+app.changeX, baseY+6+app.changeY, fill = "gainsboro")
+        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeY, baseY+5+app.changeY, fill = "gainsboro")
 
     def move(self, app):
         if not self.eat: 
@@ -632,11 +634,11 @@ class Seed(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-2, baseY-2, baseX+2, baseY+2, fill = "red")
+        canvas.create_oval(baseX-2+app.changeX, baseY-2+app.changeY, baseX+2+app.changeX, baseY+2+app.changeY, fill = "red")
         base2X, base2Y = baseX-2, baseY-4
-        canvas.create_oval(base2X-2, base2Y-2, base2X+2, base2Y+2, fill = "tomato2")
+        canvas.create_oval(base2X-2+app.changeX, base2Y-2+app.changeY, base2X+2+app.changeY, base2Y+2+app.changeY, fill = "tomato2")
         base3X, base3Y = baseX+1, baseY+1
-        canvas.create_oval(base2X-2, base2Y-2, base2X+2, base2Y+2, fill = "OrangeRed3")
+        canvas.create_oval(base2X-2+app.changeX, base2Y-2+app.changeY, base2X+2+app.changeX, base2Y+2+app.changeY, fill = "OrangeRed3")
     
     def checkTime(self, app): 
         if (app.time - self.timeCreated > 20) and self.inGarden: 
@@ -663,7 +665,7 @@ class Flower(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5, baseY-5, baseX+5, baseY+5, fill = "gold")
+        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "gold")
 
     def checkTime(self, app): 
         if (app.time - self.timeCreated > 50) and self.inGarden: 
@@ -690,5 +692,5 @@ class Fruit(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5, baseY-5, baseX+5, baseY+5, fill = "orchid1")
+        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "orchid1")
 
