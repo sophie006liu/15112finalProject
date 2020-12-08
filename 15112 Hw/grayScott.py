@@ -7,8 +7,8 @@ def appStarted(app):
     app.image2 = app.loadImage("splash2.png")
     app.image3 = app.loadImage("directions.png")
     app.image4 = app.scaleImage(app.image3, 1/2)
-    app.start = True 
-    app.start2 = False
+    app.start = True #starting screen 1
+    app.start2 = False #starting screen 2
     app.gridMode = False
 
     app.drawLine = False #dictates whether gray scott phase or world creation phase
@@ -17,10 +17,10 @@ def appStarted(app):
     app.boardA = make2dList(app.rows, app.cols, 1.0) 
     app.boardB = make2dList(app.rows, app.cols, 0.0)  
     app.threeDPoints = make2dList(app.rows, app.cols)
-    app.endX, app.endY = None, None
-    app.startX, app.startY = None, None
+    app.endX, app.endY = 0,0
+    app.startX, app.startY = 0,0
     app.changeX = app.endX - app.startX 
-    app.changeY = app.endY - app.startY 
+    app.changeY = app.endY - app.startY  
     if not app.drawLine:
         app.timerDelay = 1
     else:
@@ -37,7 +37,7 @@ def appStarted(app):
     app.worldElementList = [] #stores all elements present on a board
     app.biodList = []
 
-    app.mode = "r" #what element they are currently placing
+    app.mode = None #what element they are currently placing
     app.canDirt = False  #keeps track of all the elements that have been unlocked
     app.canTree = True
     app.canSeed = False
@@ -109,24 +109,34 @@ def maxItemLength(a):
     return maxLen
 
 def mouseReleased(app,event):
-    app.endX, app.endY =  event.x, event.y
- 
+    if app.mode == None:
+        app.endX, app.endY =  event.x, event.y
+        app.changeX = app.endX - app.startX
+        app.changeY = app.endY - app.startY
+
+# def mouseMoved(app,event):
+#     if app.mode == None:
+#         return event.x, event.y
+#     else:
+#         app.startX, app.startY, app.endX, app.endY = 0,0,0,0
+
 def mousePressed(app, event):
     app.startX, app.startY = event.x, event.y
+
     if app.start: 
         app.start = False 
         app.start2 = True
     elif app.start2:
         app.gridMode = True
         app.start2 = False 
+
     elif app.gridMode:
         #if the user clicks then they drop a seed into the diffusing board
         rows = event.y // app.cellSize
         cols = event.x // app.cellSize 
         seedB(app, rows, cols)
 
-    elif app.drawLine: # we are in the mode of adding elements to the board  
-   
+    elif app.drawLine and app.mode!= None: # we are in the mode of adding elements to the board  
         coords = (get3DPointsAroundPoint(app, event.x, event.y)) 
         newRow = []
         timeCreated = app.time
@@ -159,6 +169,7 @@ def mousePressed(app, event):
                 element = worldElements.Gold(coords, timeCreated)
             elif app.mode == '5': #lantern
                 element = worldElements.Lantern(coords, timeCreated)
+            
             app.worldElementList.append(element)    
         elif (event.x%28 !=0 or (event.x//28)%2 ==1) and event.y > 570 and event.y < 600:
             buttonNum = event.x//28 
@@ -190,6 +201,8 @@ def mousePressed(app, event):
 
    
 def keyPressed(app, event):
+    if event.key == "Space":
+        app.mode = None
     #pause the diffusion
     if event.key == "p" and not app.drawLine:
         app.pause = not app.pause
@@ -373,7 +386,11 @@ def get3DPointsAroundPoint(app, x, y):
                 app.threeDPoints[row+1][col], \
                 app.threeDPoints[row+1][col+1], \
                 app.threeDPoints[row][col+1], \
-                [x,y]):
+                [x,y], app):
+                print(app.threeDPoints[row][col], \
+                app.threeDPoints[row+1][col], \
+                app.threeDPoints[row+1][col+1], \
+                app.threeDPoints[row][col+1])
                 return  [  [row, col],  [row+1, col] ,\
                 [row+1,col+1],  [row,col+1] ]
 
@@ -446,11 +463,10 @@ def drawBoard(app, canvas):
         if app.canCoal:   
             drawTopButtons(canvas, app.width, app.height, 12, "black", "coal/2") #coal 23
         if app.canGold:   
-            drawTopButtons(canvas, app.width, app.height, 13, "goldenrod1", "gold/4") #gold 25 
-        print(app.startX, app.startY, app.endX, app.endY)
-        if app.startX != None:
+            drawTopButtons(canvas, app.width, app.height, 13, "goldenrod1", "gold/4") #gold 25  
+        if app.startX != 0:
             canvas.create_text(app.startX, app.startY, text = "start")
-        if app.endY != None: 
+        if app.endY != 0: 
             canvas.create_text(app.endX, app.endY, text = "end")
 
 #checking surroundings, time of all elements, move animals
@@ -466,31 +482,31 @@ def drawLine(canvas, app):
     for i in range(len(app.threeDPoints)):
         for j in range(len(app.threeDPoints[0])-1):
             startPt = app.threeDPoints[i][j]
-            x1 = startPt[0]
-            y1 = startPt[1]
+            x1 = startPt[0]+app.changeX
+            y1 = startPt[1]+app.changeY
 
             nxtPt = app.threeDPoints[i][j + 1]
-            x2 = nxtPt[0]
-            y2 = nxtPt[1] 
-            canvas.create_oval(x1-2+app.changeX, y1-2+app.changeY, x1+2+app.changeX, y1+2++app.changeY, fill = "white")
+            x2 = nxtPt[0]+app.changeX
+            y2 = nxtPt[1]+app.changeY
+            canvas.create_oval(x1-2, y1-2, x1+2, y1+2, fill = "white")
 
-            canvas.create_line(x1,y1,x2,y2)
+            canvas.create_line(x1-2, y1-2, x1+2, y1+2)
 
     
     for j in range(len(app.threeDPoints[0])):
         for i in range(len(app.threeDPoints)-1): 
             startPt = app.threeDPoints[i][j]
-            x1 = startPt[0]+app.change
+            x1 = startPt[0]+app.changeX
             y1 = startPt[1]+app.changeY
 
             nxtPt = app.threeDPoints[i+1][j]
-            x2 = nxtPt[0]+app.change
+            x2 = nxtPt[0]+app.changeX
             y2 = nxtPt[1]+app.changeY
 
             #if (app.boardB[i][j] > 0.35):
             if ([i,j] in app.lakeRowsAndCols):
-                canvas.create_oval(x1-2+app.changeX, y1-2+app.changeY, x1+2+app.changeX, y1+2++app.changeY, fill = "dark blue")
-            canvas.create_line(x1-2+app.changeX, y1-2+app.changeY, x1+2+app.changeX, y1+2++app.changeY)
+                canvas.create_oval(x1-2, y1-2, x1+2, y1+2, fill = "dark blue")
+            canvas.create_line(x1, y1, x2, y2)
              
 #takes one row in the board and generates a line from it's values
 def transformPoints(app):

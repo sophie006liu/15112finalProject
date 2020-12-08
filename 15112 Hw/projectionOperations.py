@@ -102,9 +102,9 @@ def planeFrom3Dpoints(pt1, pt2, pt3,pt4):
     return [v1, v2]
 
 #using barycentric coordinates to see if a point is inside a polygon
-def insidePolygon(p1,p2,p3,p4, target):
-    if insideTriangle(p1,p2,p3, target) \
-        or insideTriangle(p1,p3,p4, target):
+def insidePolygon(p1,p2,p3,p4, target, app):
+    if insideTriangle([p1[0]+app.changeX, p1[1]+app.changeY],[p2[0]+app.changeX, p2[1]+app.changeY],[p3[0]+app.changeX, p3[1]+app.changeY], target) \
+        or insideTriangle([p1[0]+app.changeX, p1[1]+app.changeY],[p3[0]+app.changeX, p3[1]+app.changeY],[p4[0]+app.changeX, p4[1]+app.changeY], target):
         return True
 
 #formula from http://www.gamesbyageek.com/triangulation/point-inside-triangle-actionscript.php

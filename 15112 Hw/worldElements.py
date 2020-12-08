@@ -23,7 +23,7 @@ class worldElement(object):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5)
+        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX +  5+app.changeX, baseY + 5+app.changeY)
 
     def checkSurrounding(self, app):
         return 
@@ -48,7 +48,7 @@ class Rock(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "gray")
+        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "gray")
 
     def checkSurrounding(self, app):    
         #if the rock is submerged in water you get dirt   
@@ -93,7 +93,7 @@ class Fire(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_rectangle(baseX-5, baseY-2, baseX+5, baseY+2, fill = "red")
+        canvas.create_rectangle(baseX-5+app.changeX, baseY-2+app.changeY, baseX+5+app.changeX, baseY+2+app.changeY, fill = "red")
 
     def checkSurrounding(self, app):
         #fire and rock creates steel
@@ -126,7 +126,7 @@ class Steel(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_rectangle(baseX-5, baseY-2, baseX+5, baseY+2, fill = "LightBlue3")
+        canvas.create_rectangle(baseX-5+app.changeX, baseY-2-app.changeY, baseX+5+app.changeX, baseY+2+app.changeY, fill = "LightBlue3")
 
     def checkSurrounding(self, app):
         #steel near trees becomes a tool
@@ -156,7 +156,7 @@ class Tool(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_rectangle(baseX-5, baseY-2, baseX+5, baseY+2, fill = "SlateBlue2")
+        canvas.create_rectangle(baseX-5+app.changeX, baseY-2+app.changeY, baseX+5+app.changeX, baseY+2+app.changeY, fill = "SlateBlue2")
     
     #tool near rock makes iron, coal, diamond, or gold
     def checkSurrounding(self, app):
@@ -201,7 +201,7 @@ class Coal(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-3, baseY-2, baseX+3, baseY+2, fill = "black")
+        canvas.create_oval(baseX-3+app.changeX, baseY-2+app.changeY, baseX+3+app.changeX, baseY+2+app.changeY, fill = "black")
 
 class Iron(worldElement):
     def __init__(self, coords, time):
@@ -220,7 +220,7 @@ class Iron(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_rectangle(baseX-3, baseY-2, baseX+3, baseY+2, fill = "LavenderBlush2")
+        canvas.create_rectangle(baseX-3+app.changeX, baseY-2+app.changeY, baseX+3+app.changeX, baseY+2+app.changeY, fill = "LavenderBlush2")
     
     #iron and rock makes lantern
     def checkSurrounding(self, app):
@@ -251,7 +251,7 @@ class Lantern(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_rectangle(baseX-5, baseY-5, baseX+5, baseY+5, fill = "goldenrod1")
+        canvas.create_rectangle(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "goldenrod1")
 
 class Diamond(worldElement):
     def __init__(self, coords, time):
@@ -270,7 +270,7 @@ class Diamond(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_rectangle(baseX-2, baseY-2, baseX+2, baseY+2, fill = "cyan")
+        canvas.create_rectangle(baseX-2+app.changeX, baseY-2+app.changeY, baseX+2+app.changeX, baseY+2+app.changeY, fill = "cyan")
 
 class Gold(worldElement):
     def __init__(self, coords, time):
@@ -289,7 +289,7 @@ class Gold(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_rectangle(baseX-2, baseY-2, baseX+2, baseY+2, fill = "goldenrod1")
+        canvas.create_rectangle(baseX-2+app.changeX, baseY-2+app.changeY, baseX+2+app.changeX, baseY+2+app.changeY, fill = "goldenrod1")
 
 class Plant(worldElement): 
     def __init__(self, coords, time):
@@ -310,7 +310,7 @@ class Plant(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = self.color)
+        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = self.color)
 
     #plant grows into tree
     def checkSurrounding(self, app):
@@ -363,7 +363,7 @@ class Fish(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_rectangle(baseX-5, baseY-2, baseX+5, baseY+2, fill = "salmon")
+        canvas.create_rectangle(baseX-5+app.changeX, baseY-2+app.changeY, baseX+5+app.changeX, baseY+2+app.changeY, fill = "salmon")
     
 class Dirt(worldElement):
     def __init__(self, coords, time):
@@ -382,7 +382,7 @@ class Dirt(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "tan")
+        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "tan")
     
     def checkSurrounding(self, app):
         nearbySeeds = set()
@@ -419,7 +419,7 @@ class Tree(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5, baseY-10, baseX +  5, baseY + 5, fill = "dark green")
+        canvas.create_oval(baseX-5+app.changeX, baseY-10+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "dark green")
    
     def checkTime(self, app): 
         #over time the tree will spawn an animal
