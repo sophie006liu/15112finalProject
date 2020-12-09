@@ -426,7 +426,7 @@ class Tree(worldElement):
         if (app.time - self.timeCreated > 2) and not self.spawnedAnimal:
             num = random.randrange(1, 4, 1)
             newCoords = copy.deepcopy(self.coords) 
-            animal = None  
+            animal = None   
             if num == 1:
                  newCoords = copy.deepcopy(self.coords)
                  animal = Rabbit(newCoords, app.time)

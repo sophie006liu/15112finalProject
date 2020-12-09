@@ -355,7 +355,7 @@ def drawBoids(app, canvas):
     for boid in app.boidList:
         x = boid.pos[0]
         y = boid.pos[1]
-        canvas.create_oval(x -2, y-2, x+2, y+2)
+        canvas.create_oval(x -2, y-2, x+2, y+2, fill = "orange")
 
 def drawTopButtons(canvas, width, height, number, color):
     start = width*(2*(number-1)+1)/30
@@ -367,9 +367,9 @@ def drawBoard(app, canvas):
     if not app.drawLine:
         for row in range(app.rows):
             for col in range(app.cols):
-                scaleRed = min(255, app.boardA[row][col] * 127 + 127)
+                scaleBlue = min(255, app.boardA[row][col] * 127 + 127)
                 scaleGreen = min(255, app.boardB[row][col] * 127 + 127)
-                color = rgbString(int(scaleRed), int(scaleGreen), 0)
+                color = rgbString(1, int(scaleGreen), int(scaleBlue))
                 x0, y0, x1, y1 = getCellBounds(app, row, col)
                 canvas.create_rectangle(x0,y0, x1, y1, fill = color) 
     else:
