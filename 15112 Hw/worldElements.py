@@ -72,7 +72,8 @@ class Rock(worldElement):
         nearbyTrees = list(nearbyTrees)
         if len(nearbyTrees)>=2:
             for i in range(2):
-                app.worldElementList.remove(nearbyTrees[i])
+                try: app.worldElementList.remove(nearbyTrees[i])
+                except: pass
             fire = Fire(self.coords, app.time)
             app.worldElementList.append(fire)
 
@@ -179,8 +180,6 @@ class Tool(worldElement):
                             ore = Gold(element.coords, app.time)
                             app.canGold = True
                         app.worldElementList.remove(element) 
-                        if ore == None:
-                            print("did not generate ore, ", num)
                         app.worldElementList.append(ore)
                         break
 
@@ -252,6 +251,9 @@ class Lantern(worldElement):
         #get the center point first
         baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_rectangle(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "goldenrod1")
+        canvas.create_rectangle(baseX-3+app.changeX, baseY-5+app.changeY, baseX+3+app.changeX, baseY+5+app.changeY, fill = "red")
+        canvas.create_rectangle(baseX-7+app.changeX, baseY-7+app.changeY, baseX+7+app.changeX, baseY-5+app.changeY, fill = "lightCyan4") #top
+        canvas.create_rectangle(baseX-7+app.changeX, baseY+5+app.changeY, baseX+7+app.changeX, baseY+7+app.changeY, fill = "lightCyan4") #bottom
 
 class Diamond(worldElement):
     def __init__(self, coords, time):
@@ -314,11 +316,18 @@ class Plant(worldElement):
 
     #plant grows into tree
     def checkSurrounding(self, app):
+        #plant submerged in water becomes seaweed
+        for lakeCoords in app.lakeRowsAndCols:
+            if lakeCoords in self.coords:
+                self.color = "light sea green"
+                return
+                
         for element in app.worldElementList:
             if isinstance(element, Dirt):
                 for dirtPoint in element.coords:
                     if dirtPoint in self.coords:
-                        app.worldElementList.remove(self)
+                        try: app.worldElementList.remove(self)
+                        except: pass
                         tree = Tree(self.coords, app.time)
                         app.worldElementList.append(tree)
                         app.canTree = True
@@ -328,16 +337,12 @@ class Plant(worldElement):
             if isinstance(element, Rock):
                 for dirtPoint in element.coords:
                     if dirtPoint in self.coords:
-                        app.worldElementList.remove(self)
+                        try: app.worldElementList.remove(self)
+                        except: pass
                         tree = Seed(self.coords, app.time)
                         app.worldElementList.append(tree)
                         app.canSeed = True
                         break
-
-        #plant submerged in water becomes seaweed
-        for lakeCoords in app.lakeRowsAndCols:
-            if lakeCoords in self.coords:
-                self.color = "light sea green"
         
     def checkTime(self, app): 
         if (app.time - self.timeCreated > 2) and self.color == "light sea green" and app.canTool: 
@@ -573,9 +578,7 @@ class Bird(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "orange")
-        canvas.create_oval(baseX-2, baseY-10, baseX, baseY + 1, fill = "orange")
-        canvas.create_oval(baseX, baseY-10, baseX+2, baseY + 1, fill = "orange")
+        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "orange") 
 
     def checkTime(self, app):
         if app.time - self.timeCreated > 2:
@@ -602,8 +605,9 @@ class Cow(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "gainsboro")
-    
+        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "gainsboro")
+        canvas.create_oval(baseX-3+app.changeX, baseY-3+app.changeY, baseX+3+app.changeX, baseY+3+app.changeY, fill = "black")
+
     def move(self, app):
         timeDiff = app.time - self.timeCreated
         if self.switch and timeDiff%70 == 0 :
