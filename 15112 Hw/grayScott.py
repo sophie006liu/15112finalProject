@@ -1,29 +1,18 @@
 from cmu_112_graphics import * #graphics package taken from class
-import math, copy, random, projectionOperations, worldElements, BoidTest, DayNight
+import math, copy, random, projectionOperationsWithDrag, worldElements, BoidTest, DayNight
 #stpres app variables
 def appStarted(app):
-    app.image1 = app.loadImage("splashTitle.png")
-    app.image2 = app.loadImage("splash2.png")
-    app.image3 = app.loadImage("directions.png")
-    app.image4 = app.scaleImage(app.image3, 1/2)
-    app.start = True #starting screen 1
-    app.start2 = False #starting screen 2
-    app.gridMode = False
-
     app.drawLine = False #dictates whether gray scott phase or world creation phase
     app.rows, app.cols, app.cellSize, app.margin = gameDimensions()
 
     app.boardA = make2dList(app.rows, app.cols, 1.0) 
     app.boardB = make2dList(app.rows, app.cols, 0.0)  
     app.threeDPoints = make2dList(app.rows, app.cols)
-    app.endX, app.endY = 0,0
-    app.startX, app.startY = 0,0
-    app.changeX = app.endX - app.startX 
-    app.changeY = app.endY - app.startY  
+
     if not app.drawLine:
-        app.timerDelay = 10
+        app.timerDelay = 1
     else:
-        app.timerDelay = 200
+        app.timerDelay = 100000
 
     app.iter = 0
     app.dA = 0.2    #the A diffusion percentage to adjacent cells
@@ -34,31 +23,34 @@ def appStarted(app):
     app.k = 0.117    #kill rate
 
     app.worldElementList = [] #stores all elements present on a board
-    app.boidList = []
+    app.biodList = []
 
-    app.mode = None #what element they are currently placing
+    app.mode = "r" #what element they are currently placing
     app.canDirt = False  #keeps track of all the elements that have been unlocked
-    app.canTree = True
+    app.canTree = False
     app.canSeed = False
     app.canFlower = False
     app.canFruit = False
     app.canSteel = False
     app.canTool = False
     app.canIron = False
-    app.canGold =False
-    app.canDiamond = True
+    app.canGold = False
+    app.canDiamond = False
     app.canCoal = False
     app.canLantern = False
     app.lakeRowsAndCols = []
 
     app.time = 0 #keeps track of the world time 
     app.pause = False #for debugging purposes
+    app.endX, app.endY = 0,0
+    app.startX, app.startY = 0,0
+    app.changeX = app.endX - app.startX 
+    app.changeY = app.endY - app.startY 
     
     app.stars = []
     app.setStars = False
     app.cloudList = []
     app.cloudStart = 0 
-
 #make2dlist taken from class
 def make2dList(rows, cols, defVal = 0.0):
         return [([defVal] * cols) for row in range(rows)]
@@ -80,59 +72,30 @@ def seedB(app, r, c):
                     newCol = c + dCol
                     app.boardB[newRow][newCol] = 1
 
+def mouseReleased(app,event): 
+    app.endX, app.endY =  event.x, event.y
+    if app.endX != app.startX and app.startY != app.endY:
+        app.changeX = app.endX - app.startX
+        app.changeY = app.endY - app.startY
 
-def print2dList(a):
-    if (a == []):
-        # So we don't crash accessing a[0]
-        print([])
-        return
-    rows, cols = len(a), len(a[0])
-    fieldWidth = maxItemLength(a)
-    print('[')
-    for row in range(rows):
-        print(' [ ', end='')
-        for col in range(cols):
-            if (col > 0): print(', ', end='')
-            print(str(a[row][col]).rjust(fieldWidth), end='')
-        print(' ]')
-    print(']')
-
-
-
-def maxItemLength(a):
-    maxLen = 0
-    rows = len(a)
-    cols = len(a[0])
-    for row in range(rows):
-        for col in range(cols):
-            maxLen = max(maxLen, len(str(a[row][col])))
-    return maxLen
-
-# def mouseReleased(app,event):
+# def mouseMoved(app,event):
 #     if app.mode == None:
-#         app.endX, app.endY =  event.x, event.y
-#         app.changeX = app.endX - app.startX
-#         app.changeY = app.endY - app.startY
+#         return event.x, event.y
+#     else:
+#         app.startX, app.startY, app.endX, app.endY = 0,0,0,0
 
 def mousePressed(app, event):
-    app.startX, app.startY = event.x, event.y
+    app.startX, app.startY = event.x, event.y 
 
-    if app.start: 
-        app.start = False 
-        app.start2 = True
-    elif app.start2:
-        app.gridMode = True
-        app.start2 = False 
-
-    elif app.gridMode:
+    if not app.drawLine:
         #if the user clicks then they drop a seed into the diffusing board
         rows = event.y // app.cellSize
         cols = event.x // app.cellSize 
         seedB(app, rows, cols)
 
-    elif app.drawLine and app.mode!= None: # we are in the mode of adding elements to the board  
+    elif app.drawLine: # we are in the mode of adding elements to the board
         coords = (get3DPointsAroundPoint(app, event.x, event.y)) 
-        newRow = []
+
         timeCreated = app.time
         if coords != None:
             if app.mode == "r": #rock
@@ -151,7 +114,7 @@ def mousePressed(app, event):
                 element = worldElements.Fruit(coords, timeCreated)
             elif app.mode == 'm': #steel
                 element = worldElements.Steel(coords, timeCreated)
-            elif app.mode == '0': #tool
+            elif app.mode == '0': #iron
                 element = worldElements.Tool(coords, timeCreated)
             elif app.mode == '1': #iron
                 element = worldElements.Iron(coords, timeCreated)
@@ -163,8 +126,7 @@ def mousePressed(app, event):
                 element = worldElements.Gold(coords, timeCreated)
             elif app.mode == '5': #lantern
                 element = worldElements.Lantern(coords, timeCreated)
-            
-            app.worldElementList.append(element)   
+            app.worldElementList.append(element)    
         elif (event.x%28 !=0 or (event.x//28)%2 ==1) and event.y > 570 and event.y < 600:
             buttonNum = event.x//28 
             if buttonNum == 1: app.mode = "r"  
@@ -192,23 +154,21 @@ def mousePressed(app, event):
             if buttonNum == 23 and app.canCoal: app.mode = "2" 
 
             if buttonNum == 25 and app.canLantern: app.mode = "5" 
+        else:
+            print(app.time)
 
-   
 def keyPressed(app, event):
-    if event.key == "Space":
-        app.mode = None
     #pause the diffusion
     if event.key == "p" and not app.drawLine:
         app.pause = not app.pause
 
     #leave diffusion board go to 3D terrain
-    elif event.key == "g":
+    if event.key == "g" and not app.drawLine:
         transformPoints(app)
         app.drawLine = True
-        app.gridMode = False
 
     #switch to rock mode and/or plant mode
-    elif event.key == "r" or (event.key == "p" and app.drawLine):
+    if event.key == "r" or (event.key == "p" and app.drawLine):
         app.mode = event.key
 
     elif event.key == "d":
@@ -282,8 +242,10 @@ def keyPressed(app, event):
             print("Try the ores!")
         else: 
             app.mode = "5"
+    
     elif event.key == "." and app.canDiamond:
-        app.threeDPoints.append([ projectionOperations.pointTransformer([len(app.threeDPoints), i, 0, 1]) for i in range(len(app.threeDPoints))  ] )
+        app.threeDPoints.append([ projectionOperationsWithDrag.pointTransformer([len(app.threeDPoints), i, 0, 1]) for i in range(len(app.threeDPoints))  ] )
+    
 #checks to see if a move in a particular direction is still on the board
 def neighborExists(app, direction, row, col):
     dRow = direction[0]
@@ -341,7 +303,8 @@ def grayScottRD(app):
                 
             if app.boardA[row][col] < 0 or app.boardA[row][col] >1:
                 #this is the gray scott reaction formula taken from https://www.karlsims.com/rd.html
-                print("NewA is out of range", row, col, A, B, deltaBoardA[row][col], A*B*B, deltaBoardB[row][col]) 
+                print("NewA is out of range", row, col, A, B, deltaBoardA[row][col], A*B*B, deltaBoardB[row][col])
+                print(app.boardA[row][col])
             if app.boardB[row][col] < 0 or app.boardB[row][col] > 1:
                 print("NewB is out of range", row, col, A, B, deltaBoardA[row][col], A*B*B, deltaBoardB[row][col])
                
@@ -376,11 +339,11 @@ def getCellBounds(app, row, col):
 def get3DPointsAroundPoint(app, x, y):
     for row in range(len(app.threeDPoints)-1):
         for col in range(len(app.threeDPoints[0])-1):                          
-            if projectionOperations.insidePolygon(app.threeDPoints[row][col], \
+            if projectionOperationsWithDrag.insidePolygon(app.threeDPoints[row][col], \
                 app.threeDPoints[row+1][col], \
                 app.threeDPoints[row+1][col+1], \
                 app.threeDPoints[row][col+1], \
-                [x,y], app): 
+                [x,y], app):
                 return  [  [row, col],  [row+1, col] ,\
                 [row+1,col+1],  [row,col+1] ]
 
@@ -389,87 +352,75 @@ def rgbString(r, g, b):
     return f'#{r:02x}{g:02x}{b:02x}'
 
 def drawBoids(app, canvas):
-    if app.boidList == []:
-        return
-    else:
-        for boid in app.boidList:
-            x = boid.pos[0]
-            y = boid.pos[1]
-            canvas.create_oval(x -2, y-2, x+2, y+2, fill = "orange")
+    for boid in app.biodList:
+        x = boid.pos[0]
+        y = boid.pos[1]
+        canvas.create_oval(x -2, y-2, x+2, y+2)
 
-def drawTopButtons(canvas, width, height, number, color, label):
+def drawTopButtons(canvas, width, height, number, color):
     start = width*(2*(number-1)+1)/30
     end = width*(2*(number))/30
     canvas.create_rectangle(start, height*5/7, end, height*5/7+30, fill= color)
-    canvas.create_text(int((start+end)/2), height*5/7+15,  text = label, fill = "white", font="Arial 12 bold")
 
 #creates the grid and the numbers
 def drawBoard(app, canvas):
-    if app.start:
-        canvas.create_rectangle(0,0, app.width, app.height, fill = rgbString(0, 149,240))
-        canvas.create_image(400, 400, image=ImageTk.PhotoImage(app.image1))
-    elif app.start2: 
-        canvas.create_image(400, 400, image=ImageTk.PhotoImage(app.image2))
-    elif not app.drawLine and not app.start and not app.start2:
+    if not app.drawLine:
         for row in range(app.rows):
-            for col in range(app.cols): 
-                scaleBlue= min(255, app.boardA[row][col] * 60 + 177)
-                scaleGreen = min(255, app.boardB[row][col] * 60 + 177)
-                color = rgbString(100, int(scaleGreen), int(scaleBlue))
+            for col in range(app.cols):
+                scaleRed = min(255, app.boardA[row][col] * 127 + 127)
+                scaleGreen = min(255, app.boardB[row][col] * 127 + 127)
+                color = rgbString(int(scaleRed), int(scaleGreen), 0)
                 x0, y0, x1, y1 = getCellBounds(app, row, col)
                 canvas.create_rectangle(x0,y0, x1, y1, fill = color) 
-    elif app.drawLine and not app.start:
-        print("drawing world")
+    else:
         DayNight.drawBackGround(canvas, app)
-
-
-        canvas.create_image(app.width*3/4, app.height*3/4, image=ImageTk.PhotoImage(app.image4))
         if app.cloudStart:
             for cloud in app.cloudList:
                 cloud.drawCloud(canvas, app)
-        print("finshed clouds")
-
         #draw the contour plot
         drawLine(canvas, app)
-        print("finished drawing lnies")
-
-        #draw all elements
         drawBoids(app, canvas)
-        print("finshed drawing boids")
-        print(app.worldElementList)
-        for element in app.worldElementList:
+        #draw all elements
+        for index, element in enumerate(app.worldElementList):
             element.drawElement(canvas, app) #the coordinates are 4 sets of row and col
-        print("finshed drawing elements")
-
+       
         #buttons
-        drawTopButtons(canvas, app.width, app.height, 1, "gray", "rock/r") #rock 1
-        drawTopButtons(canvas, app.width, app.height, 2, "green", "plant/p") #plant 3
+        drawTopButtons(canvas, app.width, app.height, 1, "gray") #rock 1
+        drawTopButtons(canvas, app.width, app.height, 2, "green") #plant 3
         if app.canDirt:
-            drawTopButtons(canvas, app.width, app.height, 3, "tan", "dirt/d") #dirt 5
+            drawTopButtons(canvas, app.width, app.height, 3, "tan") #dirt 5
         if app.canTree:
-            drawTopButtons(canvas, app.width, app.height, 4, "dark green", "tree/t") #tree 7
+            drawTopButtons(canvas, app.width, app.height, 4, "dark green") #tree 7
         if app.canSeed:
-            drawTopButtons(canvas, app.width, app.height, 5, "red", "seed/s") #seed 9
+            drawTopButtons(canvas, app.width, app.height, 5, "red") #seed 9
         if app.canFlower:   
-            drawTopButtons(canvas, app.width, app.height, 6, "gold", "flower/f") #flower 11 
+            drawTopButtons(canvas, app.width, app.height, 6, "gold") #flower 11 
         if app.canFruit:    
-            drawTopButtons(canvas, app.width, app.height, 7, "orchid1", "fruit/o") #fruit 13  
+            drawTopButtons(canvas, app.width, app.height, 7, "orchid1") #fruit 13  
         if app.canSteel:
-            drawTopButtons(canvas, app.width, app.height, 8, "lightblue3", "steel/m") #steel 15       
+            drawTopButtons(canvas, app.width, app.height, 8, "lightblue3") #steel 15       
         if app.canTool:    
-            drawTopButtons(canvas, app.width, app.height, 9, "slateblue2", "tool/0") #tool 17 
+            drawTopButtons(canvas, app.width, app.height, 9, "slateblue2") #tool 17 
         if app.canIron:
-            drawTopButtons(canvas, app.width, app.height, 10, "lavenderblush2", "iron/1") #iron 19 
+            drawTopButtons(canvas, app.width, app.height, 10, "lavenderblush2") #iron 19 
         if app.canDiamond:    
-            drawTopButtons(canvas, app.width, app.height, 11, "cyan", "diamond/3") #diamond 21
+            drawTopButtons(canvas, app.width, app.height, 11, "cyan") #diamond 21
         if app.canCoal:   
-            drawTopButtons(canvas, app.width, app.height, 12, "black", "coal/2") #coal 23
+            drawTopButtons(canvas, app.width, app.height, 12, "black") #coal 23
         if app.canGold:   
-            drawTopButtons(canvas, app.width, app.height, 13, "goldenrod1", "gold/4") #gold 25  
-        if app.startX != 0:
-            canvas.create_text(app.startX, app.startY, text = "start")
-        if app.endY != 0: 
-            canvas.create_text(app.endX, app.endY, text = "end")
+            drawTopButtons(canvas, app.width, app.height, 13, "goldenrod1") #gold 25 
+        # if app.startX != 0:
+        #     canvas.create_text(app.startX, app.startY, text = "start")
+        # if app.endY != 0: 
+        #     canvas.create_text(app.endX, app.endY, text = "end")
+
+#checking surroundings, time of all elements, move animals
+def checkAllElements(app):
+    for element in app.worldElementList:
+        element.checkSurrounding(app)
+        element.checkTime(app)
+        if isinstance(element, worldElements.Rabbit) or isinstance(element, worldElements.Cow) or isinstance(element, worldElements.Dog):
+                element.move(app)
 
 #drawing the lines of the contour plot
 def drawLine(canvas, app):
@@ -482,13 +433,15 @@ def drawLine(canvas, app):
             nxtPt = app.threeDPoints[i][j + 1]
             x2 = nxtPt[0]+app.changeX
             y2 = nxtPt[1]+app.changeY
+            #debugging purposes to get sense of board orientation
             canvas.create_oval(x1-2, y1-2, x1+2, y1+2, fill = "white")
+     
 
-            canvas.create_line(x1-2, y1-2, x1+2, y1+2)
+            canvas.create_line(x1,y1,x2,y2)
 
     
     for j in range(len(app.threeDPoints[0])):
-        for i in range(len(app.threeDPoints)-1): 
+        for i in range(len(app.threeDPoints)-1):
             startPt = app.threeDPoints[i][j]
             x1 = startPt[0]+app.changeX
             y1 = startPt[1]+app.changeY
@@ -497,10 +450,9 @@ def drawLine(canvas, app):
             x2 = nxtPt[0]+app.changeX
             y2 = nxtPt[1]+app.changeY
 
-            #if (app.boardB[i][j] > 0.35):
-            if ([i,j] in app.lakeRowsAndCols):
+            if i < len(app.boardB) and j < len(app.boardB[0])and (app.boardB[i][j] > 0.35):
                 canvas.create_oval(x1-2, y1-2, x1+2, y1+2, fill = "dark blue")
-            canvas.create_line(x1, y1, x2, y2)
+            canvas.create_line(x1,y1,x2,y2)
              
 #takes one row in the board and generates a line from it's values
 def transformPoints(app):
@@ -508,7 +460,7 @@ def transformPoints(app):
     for i in range(len(app.boardA)):
         for j in range(len(app.boardA[0])):
             startPoint = [i, j, app.boardB[i][j]/4, 1]
-            newPoint = projectionOperations.pointTransformer(startPoint)
+            newPoint = projectionOperationsWithDrag.pointTransformer(startPoint)
             if (app.boardB[i][j] > 0.35): 
                 app.lakeRowsAndCols.append([i,j])
 
@@ -518,33 +470,17 @@ def transformPoints(app):
 def oneDiffuse(app):
     grayScottRD(app)
 
-#checking surroundings, time of all elements, move animals
-def checkAllElements(app):
-    print("worldelements", app.worldElementList)
-    for element in app.worldElementList:
-        print("checking elemtn")
-        element.checkSurrounding(app)
-        element.checkTime(app)
-        print("checking time")
-        if isinstance(element, worldElements.Rabbit) or isinstance(element, worldElements.Cow) or isinstance(element, worldElements.Dog):
-                element.move(app)
-
 #constantly gets called
 def timerFired(app):
-    print("enter timer fired")
-    print(app.drawLine)
-
-    if app.drawLine: 
-        print("in timerfired and about to check")
-        checkAllElements(app)
-        for boid in app.boidList:
-            boid.move(app)
-            boid.wrapAround(app)
-
     if not app.drawLine and not app.pause:
         grayScottRD(app)
         app.iter += 1
 
+    if app.drawLine: 
+        checkAllElements(app)
+        for boid in app.biodList:
+            boid.move(app)
+            boid.wrapAround(app)
 
     if app.time != 0 and (app.time-200)%600 < 150:
         if not app.setStars:
@@ -555,15 +491,13 @@ def timerFired(app):
                 tup = (x,y)
                 app.stars.append(tup)
             app.setStars = True
-
     if (app.time-200)%600 >= 150 and app.setStars:
         app.setStars = False
         app.stars = []
-        print("finished drawing stars")
 
     #chance of clouds
     chance = random.randrange(1, 100, 1)
-    if chance>= 1 and chance <=40 and app.cloudStart == 0 and app.drawLine:
+    if chance>= 1 and chance <=40 and app.cloudStart == 0:
         numberClouds = random.randrange(5, 20, 1)
         for i in range(numberClouds):
             x = random.randrange(1, app.width, 1)
@@ -577,16 +511,12 @@ def timerFired(app):
             cloud = DayNight.Cloud(x, y, size, color, smallSize, midSize)
             app.cloudList.append(cloud)
         app.cloudStart = app.time
-    print("finished drawing clouds in tinerfired")
 
-    #keeping track of the time the clouds have been present
     if app.time - app.cloudStart > 200:
         app.cloudStart = 0
         app.cloudList = [] 
-        print("cleared cloud list")
 
     app.time += 1 
-    print("exit timer fired")
 
 #refreshes the canvas each time
 def redrawAll(canvas, app):
@@ -604,7 +534,8 @@ def grayScottyBoy():
 
 #also starts the simulation
 def main():
-    grayScottyBoy() 
+    grayScottyBoy()
+    master = Tk()
  
 
 if __name__ == '__main__':

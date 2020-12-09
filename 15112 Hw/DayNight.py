@@ -1,5 +1,5 @@
 from cmu_112_graphics import * #graphics package taken from class
-import math, copy, random, projectionOperations, worldElements, BoidTest#, StarShower don't need this yet/it can't work lol
+import math, copy, random, projectionOperationsWithDrag, worldElements, BoidTest 
 #from 15112 class website https://www.cs.cmu.edu/~112/notes/notes-graphics.html
 
 def rgbString(r, g, b):

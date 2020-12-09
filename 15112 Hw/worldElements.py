@@ -1,6 +1,6 @@
 
 from cmu_112_graphics import *
-import math, copy, random, projectionOperations, BoidTest, astarPseudo
+import math, copy, random, projectionOperationsWithDrag, BoidTest, astarPseudo
 
 class worldElement(object):
     #each element is a kind of element (tree, dirt, etc) 
@@ -22,8 +22,8 @@ class worldElement(object):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX +  5+app.changeX, baseY + 5+app.changeY)
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_oval(baseX-5, baseY-5, baseX +5, baseY + 5)
 
     def checkSurrounding(self, app):
         return 
@@ -47,8 +47,8 @@ class Rock(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "gray")
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX +5+app.changeX, baseY + 5+app.changeY, fill = "gray")
 
     def checkSurrounding(self, app):    
         #if the rock is submerged in water you get dirt   
@@ -92,7 +92,7 @@ class Fire(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_rectangle(baseX-5+app.changeX, baseY-2+app.changeY, baseX+5+app.changeX, baseY+2+app.changeY, fill = "red")
 
     def checkSurrounding(self, app):
@@ -125,8 +125,8 @@ class Steel(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_rectangle(baseX-5+app.changeX, baseY-2-app.changeY, baseX+5+app.changeX, baseY+2+app.changeY, fill = "LightBlue3")
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_rectangle(baseX-5+app.changeX, baseY-2+app.changeY, baseX+5+app.changeX, baseY+2+app.changeY, fill = "LightBlue3")
 
     def checkSurrounding(self, app):
         #steel near trees becomes a tool
@@ -155,7 +155,7 @@ class Tool(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_rectangle(baseX-5+app.changeX, baseY-2+app.changeY, baseX+5+app.changeX, baseY+2+app.changeY, fill = "SlateBlue2")
     
     #tool near rock makes iron, coal, diamond, or gold
@@ -200,7 +200,7 @@ class Coal(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_oval(baseX-3+app.changeX, baseY-2+app.changeY, baseX+3+app.changeX, baseY+2+app.changeY, fill = "black")
 
 class Iron(worldElement):
@@ -219,7 +219,7 @@ class Iron(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_rectangle(baseX-3+app.changeX, baseY-2+app.changeY, baseX+3+app.changeX, baseY+2+app.changeY, fill = "LavenderBlush2")
     
     #iron and rock makes lantern
@@ -250,7 +250,7 @@ class Lantern(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_rectangle(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "goldenrod1")
 
 class Diamond(worldElement):
@@ -269,7 +269,7 @@ class Diamond(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_rectangle(baseX-2+app.changeX, baseY-2+app.changeY, baseX+2+app.changeX, baseY+2+app.changeY, fill = "cyan")
 
 class Gold(worldElement):
@@ -288,7 +288,7 @@ class Gold(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_rectangle(baseX-2+app.changeX, baseY-2+app.changeY, baseX+2+app.changeX, baseY+2+app.changeY, fill = "goldenrod1")
 
 class Plant(worldElement): 
@@ -309,8 +309,8 @@ class Plant(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = self.color)
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY + 5+app.changeY, fill = self.color)
 
     #plant grows into tree
     def checkSurrounding(self, app):
@@ -318,13 +318,11 @@ class Plant(worldElement):
             if isinstance(element, Dirt):
                 for dirtPoint in element.coords:
                     if dirtPoint in self.coords:
-                        try: app.worldElementList.remove(self)
-                        except: pass
+                        app.worldElementList.remove(self)
                         tree = Tree(self.coords, app.time)
                         app.worldElementList.append(tree)
                         app.canTree = True
                         break
-
     #plant becomes seeds near rock 
         for element in app.worldElementList:
             if isinstance(element, Rock):
@@ -362,7 +360,7 @@ class Fish(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_rectangle(baseX-5+app.changeX, baseY-2+app.changeY, baseX+5+app.changeX, baseY+2+app.changeY, fill = "salmon")
     
 class Dirt(worldElement):
@@ -381,8 +379,8 @@ class Dirt(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "tan")
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX +  5+app.changeX, baseY + 5+app.changeY, fill = "tan")
     
     def checkSurrounding(self, app):
         nearbySeeds = set()
@@ -418,26 +416,26 @@ class Tree(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5+app.changeX, baseY-10+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "dark green")
-   
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_rectangle(baseX-5+app.changeX, baseY-15+app.changeY, baseX +  5+app.changeX, baseY-2+app.changeY, fill = "dark green")
+        canvas.create_rectangle(baseX-8+app.changeX, baseY-5+app.changeY, baseX-2+app.changeX, baseY-1+app.changeY, fill = "green4")
+        canvas.create_rectangle(baseX+2+app.changeX, baseY-10+app.changeY, baseX+6+app.changeX, baseY-5+app.changeY, fill = "green4")
+        canvas.create_rectangle(baseX-2+app.changeX, baseY-2+app.changeY, baseX +2+app.changeX, baseY+5+app.changeY, fill = "brown")
     def checkTime(self, app): 
-        print("print checking time of tree")
         #over time the tree will spawn an animal
-        if (app.time - self.timeCreated > 0 and not self.spawnedAnimal):
-            print("spawning animal")
+        if (app.time - self.timeCreated > 2) and not self.spawnedAnimal:
             num = random.randrange(1, 4, 1)
             newCoords = copy.deepcopy(self.coords) 
-            animal = Bird(newCoords, app.time)
-            #animal = None     
+            animal = None
+            animal = Rabbit(newCoords, app.time)
             # if num == 1:
-            #     newCoords = copy.deepcopy(self.coords)
-            #     animal = Rabbit(newCoords, app.time)
+            #      newCoords = copy.deepcopy(self.coords)
+            #      animal = Rabbit(newCoords, app.time)
             # elif num == 2:
-            #     newCoords = copy.deepcopy(self.coords)
-            #     animal = Cow(newCoords, app.time)
+            #      newCoords = copy.deepcopy(self.coords)
+            #      animal = Cow(newCoords, app.time)
             # elif num == 3:
-            #     animal = Bird(self.coords, app.time)
+            #      animal = Bird(self.coords, app.time)
             app.worldElementList.append(animal)
             self.spawnedAnimal = True
 
@@ -445,7 +443,7 @@ class Rabbit(worldElement):
     def __init__(self, coords, time):
         super().__init__(coords, time)
         self.spawnedDog = False
-
+       
     def drawElement(self, canvas, app):
         pt1R, pt1C = self.coords[0]
         pt2R, pt2C = self.coords[1]
@@ -458,7 +456,7 @@ class Rabbit(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "white")
         canvas.create_oval(baseX-2+app.changeX, baseY-10+app.changeY, baseX+app.changeX, baseY+1+app.changeY, fill = "white")
         canvas.create_oval(baseX+app.changeX, baseY-10+app.changeY, baseX+2+app.changeX, baseY+1+app.changeY, fill = "white")
@@ -492,65 +490,6 @@ class Rabbit(worldElement):
             app.worldElementList.append(dog)
             self.spawnedDog = True 
 
-class Bird(worldElement):
-    def __init__(self, coords, time):
-        super().__init__(coords, time)
-       
-    def drawElement(self, canvas, app):
-        pt1R, pt1C = self.coords[0]
-        pt2R, pt2C = self.coords[1]
-        pt3R, pt3C = self.coords[2]
-        pt4R, pt4C = self.coords[3]
-
-        pt1 = app.threeDPoints[pt1R][pt1C]
-        pt2 = app.threeDPoints[pt2R][pt2C]
-        pt3 = app.threeDPoints[pt3R][pt3C]
-        pt4 = app.threeDPoints[pt4R][pt4C]
-
-        #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "orange")
-        canvas.create_oval(baseX-2+app.changeX, baseY-10+app.changeY, baseX+app.changeX, baseY+1+app.changeY, fill = "orange")
-        canvas.create_oval(baseX+app.changeX, baseY-10+app.changeY, baseX+2+app.changeY, baseY+1+app.changeY, fill = "orange")
-
-    def checkTime(self, app):
-        if app.time - self.timeCreated > 2:
-            app.worldElementList.remove(self)
-            biod  = BoidTest.Boid(10+ random.randrange (app.width-10), 10 + random.randrange (app.height-10))
-            app.boidList.append(biod)
-
-class Cow(worldElement):
-    def __init__(self, coords, time):
-        super().__init__(coords, time)
-        self.switch = True
-       
-    def drawElement(self, canvas, app):
-        pt1R, pt1C = self.coords[0]
-        pt2R, pt2C = self.coords[1]
-        pt3R, pt3C = self.coords[2]
-        pt4R, pt4C = self.coords[3]
-
-        pt1 = app.threeDPoints[pt1R][pt1C]
-        pt2 = app.threeDPoints[pt2R][pt2C]
-        pt3 = app.threeDPoints[pt3R][pt3C]
-        pt4 = app.threeDPoints[pt4R][pt4C]
-
-        #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeY, baseY+5++app.changeY, fill = "gainsboro")
-    
-    def move(self, app):
-        timeDiff = app.time - self.timeCreated
-        if self.switch and timeDiff%70 == 0 :
-            print("in here")
-            for point in self.coords:
-                point[0] += 1
-            self.switch = not self.switch
-        elif timeDiff%70 == 0 and not self.switch:
-            for point in self.coords:
-                point[0] -= 1
-            self.switch = not self.switch
-
 class Dog(worldElement):
     def __init__(self, coords, time):
         super().__init__(coords, time)
@@ -570,10 +509,12 @@ class Dog(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_rectangle(baseX-9+app.changeX, baseY+2+app.changeY, baseX+app.changeX, baseY+6+app.changeY, fill = "gainsboro")
-        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeY, baseY+5+app.changeY, fill = "gainsboro")
-
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_rectangle(baseX-9+app.changeX, baseY+2+app.changeY, baseX+app.changeX, baseY+5+app.changeY, fill = "gainsboro") #tail
+        canvas.create_rectangle(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY + 5+app.changeY, fill = "gainsboro") #body
+        canvas.create_rectangle(baseX-5+app.changeX, baseY-7+app.changeY, baseX -2 +app.changeX, baseY- 5+app.changeY, fill = "gainsboro") #ear
+        canvas.create_rectangle(baseX+2+app.changeX, baseY-7+app.changeY, baseX+5 +app.changeX, baseY- 5+app.changeY, fill = "gainsboro") #ear
+        canvas.create_rectangle(baseX+1+app.changeX, baseY-2+app.changeY, baseX+7+app.changeX, baseY+2+app.changeY, fill = "tan") #tail
     def move(self, app):
         if not self.eat: 
             if self.target == None:
@@ -584,16 +525,18 @@ class Dog(worldElement):
                 selfCoord = (self.coords[0][0],self.coords[0][1])
                 targetCoord = (self.target.coords[0][0],self.target.coords[0][1])
                 self.path = astarPseudo.aStarSearch(selfCoord, targetCoord, app)
-                nextMove = self.path[1]
+                nextMove = self.path[0]
                 newDirection = [nextMove[0] - selfCoord[0], nextMove[1] - selfCoord[1]] 
                 for coord in self.coords:
                     coord[0] += newDirection[0]
                     coord[1] += newDirection[1]
                 self.path = self.path[2:]
             elif self.target!= None and len(self.path) == 0: #reached end of path
-                app.worldElementList.remove(self.target)
-                self.eat = True
-                self.target = None
+                try: 
+                    app.worldElementList.remove(self.target)
+                    self.eat = True
+                    self.target = None
+                except: return
 
             elif self.target.coords[0] == self.lastTCoords:
                 selfCoord = (self.coords[0][0],self.coords[0][1])
@@ -614,7 +557,66 @@ class Dog(worldElement):
                     coord[1] += newDirection[1]
                 self.path = self.path[1:]
 
-        
+class Bird(worldElement):
+    def __init__(self, coords, time):
+        super().__init__(coords, time)
+       
+    def drawElement(self, canvas, app):
+        pt1R, pt1C = self.coords[0]
+        pt2R, pt2C = self.coords[1]
+        pt3R, pt3C = self.coords[2]
+        pt4R, pt4C = self.coords[3]
+
+        pt1 = app.threeDPoints[pt1R][pt1C]
+        pt2 = app.threeDPoints[pt2R][pt2C]
+        pt3 = app.threeDPoints[pt3R][pt3C]
+        pt4 = app.threeDPoints[pt4R][pt4C]
+
+        #get the center point first
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "orange")
+        canvas.create_oval(baseX-2, baseY-10, baseX, baseY + 1, fill = "orange")
+        canvas.create_oval(baseX, baseY-10, baseX+2, baseY + 1, fill = "orange")
+
+    def checkTime(self, app):
+        if app.time - self.timeCreated > 2:
+            app.worldElementList.remove(self)
+            biod  = BoidTest.Boid(10+ random.randrange (app.width-10), 10 + random.randrange (app.height-10))
+            app.biodList.append(biod)
+
+
+class Cow(worldElement):
+    def __init__(self, coords, time):
+        super().__init__(coords, time)
+        self.switch = True
+       
+    def drawElement(self, canvas, app):
+        pt1R, pt1C = self.coords[0]
+        pt2R, pt2C = self.coords[1]
+        pt3R, pt3C = self.coords[2]
+        pt4R, pt4C = self.coords[3]
+
+        pt1 = app.threeDPoints[pt1R][pt1C]
+        pt2 = app.threeDPoints[pt2R][pt2C]
+        pt3 = app.threeDPoints[pt3R][pt3C]
+        pt4 = app.threeDPoints[pt4R][pt4C]
+
+        #get the center point first
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_oval(baseX-5, baseY-5, baseX +  5, baseY + 5, fill = "gainsboro")
+    
+    def move(self, app):
+        timeDiff = app.time - self.timeCreated
+        if self.switch and timeDiff%70 == 0 :
+            print("in here")
+            for point in self.coords:
+                point[0] += 1
+            self.switch = not self.switch
+        elif timeDiff%70 == 0 and not self.switch:
+            for point in self.coords:
+                point[0] -= 1
+            self.switch = not self.switch
+
 
 class Seed(worldElement):
     def __init__(self, coords, time, gardenStatus = False):
@@ -633,20 +635,21 @@ class Seed(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
         canvas.create_oval(baseX-2+app.changeX, baseY-2+app.changeY, baseX+2+app.changeX, baseY+2+app.changeY, fill = "red")
         base2X, base2Y = baseX-2, baseY-4
-        canvas.create_oval(base2X-2+app.changeX, base2Y-2+app.changeY, base2X+2+app.changeY, base2Y+2+app.changeY, fill = "tomato2")
+        canvas.create_oval(base2X-2+app.changeX, base2Y-2+app.changeY, base2X+2+app.changeX, base2Y+2+app.changeY, fill = "tomato2")
         base3X, base3Y = baseX+1, baseY+1
         canvas.create_oval(base2X-2+app.changeX, base2Y-2+app.changeY, base2X+2+app.changeX, base2Y+2+app.changeY, fill = "OrangeRed3")
     
     def checkTime(self, app): 
-        if (app.time - self.timeCreated > 20) and self.inGarden: 
+        if (app.time - self.timeCreated > 5) and self.inGarden: 
             flower = Flower(self.coords, app.time, True)   
             app.worldElementList.append(flower)
             app.canFlower = True
             app.worldElementList.remove(self)
-                
+    
+             
 class Flower(worldElement):
     def __init__(self, coords, time, inGardenStatus = False):
         super().__init__(coords, time)
@@ -664,11 +667,16 @@ class Flower(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "gold")
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_line(baseX-1, baseY-2, baseX-1, baseY+8, fill = "green")
+        canvas.create_line(baseX-4, baseY-2, baseX-4, baseY+8, fill = "green")
+        canvas.create_line(baseX+2, baseY-3, baseX+2, baseY+8, fill = "green")
 
+        canvas.create_rectangle(baseX-2, baseY-2, baseX+3, baseY+3, fill = "gold")
+        canvas.create_rectangle(baseX-8, baseY-5, baseX-3, baseY, fill = "gold")
+        canvas.create_rectangle(baseX+6, baseY-4, baseX+2, baseY, fill = "gold")
     def checkTime(self, app): 
-        if (app.time - self.timeCreated > 50) and self.inGarden: 
+        if (app.time - self.timeCreated > 10) and self.inGarden: 
             fruit = Fruit(self.coords, app.time, True)   
             app.worldElementList.append(fruit)
             app.canFruit = True
@@ -691,6 +699,7 @@ class Fruit(worldElement):
         pt4 = app.threeDPoints[pt4R][pt4C]
 
         #get the center point first
-        baseX, baseY = projectionOperations.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_oval(baseX-5+app.changeX, baseY-5+app.changeY, baseX+5+app.changeX, baseY+5+app.changeY, fill = "orchid1")
-
+        baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
+        canvas.create_rectangle(baseX-2, baseY-12, baseX+2, baseY, fill = "orange") #stem
+        canvas.create_rectangle(baseX-7, baseY-5, baseX+7, baseY+7, fill = "orchid1") #body of fruit
+        canvas.create_rectangle(baseX+1, baseY-9, baseX+5, baseY-6, fill = "springGreen2") 
