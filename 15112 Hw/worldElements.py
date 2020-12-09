@@ -426,16 +426,15 @@ class Tree(worldElement):
         if (app.time - self.timeCreated > 2) and not self.spawnedAnimal:
             num = random.randrange(1, 4, 1)
             newCoords = copy.deepcopy(self.coords) 
-            animal = None
-            animal = Rabbit(newCoords, app.time)
-            # if num == 1:
-            #      newCoords = copy.deepcopy(self.coords)
-            #      animal = Rabbit(newCoords, app.time)
-            # elif num == 2:
-            #      newCoords = copy.deepcopy(self.coords)
-            #      animal = Cow(newCoords, app.time)
-            # elif num == 3:
-            #      animal = Bird(self.coords, app.time)
+            animal = None  
+            if num == 1:
+                 newCoords = copy.deepcopy(self.coords)
+                 animal = Rabbit(newCoords, app.time)
+            elif num == 2:
+                 newCoords = copy.deepcopy(self.coords)
+                 animal = Cow(newCoords, app.time)
+            elif num == 3:
+                 animal = Bird(self.coords, app.time)
             app.worldElementList.append(animal)
             self.spawnedAnimal = True
 
@@ -582,7 +581,7 @@ class Bird(worldElement):
         if app.time - self.timeCreated > 2:
             app.worldElementList.remove(self)
             biod  = BoidTest.Boid(10+ random.randrange (app.width-10), 10 + random.randrange (app.height-10))
-            app.biodList.append(biod)
+            app.boidList.append(biod)
 
 
 class Cow(worldElement):
@@ -672,9 +671,9 @@ class Flower(worldElement):
         canvas.create_line(baseX-4, baseY-2, baseX-4, baseY+8, fill = "green")
         canvas.create_line(baseX+2, baseY-3, baseX+2, baseY+8, fill = "green")
 
-        canvas.create_rectangle(baseX-2, baseY-2, baseX+3, baseY+3, fill = "gold")
-        canvas.create_rectangle(baseX-8, baseY-5, baseX-3, baseY, fill = "gold")
-        canvas.create_rectangle(baseX+6, baseY-4, baseX+2, baseY, fill = "gold")
+        canvas.create_rectangle(baseX-2+app.changeX, baseY-2+app.changeY, baseX+3+app.changeX, baseY+3+app.changeY, fill = "gold")
+        canvas.create_rectangle(baseX-8+app.changeX, baseY-5+app.changeY, baseX-3+app.changeX, baseY+app.changeY, fill = "gold")
+        canvas.create_rectangle(baseX+6+app.changeX, baseY-4+app.changeY, baseX+2+app.changeX, baseY+app.changeY, fill = "gold")
     def checkTime(self, app): 
         if (app.time - self.timeCreated > 10) and self.inGarden: 
             fruit = Fruit(self.coords, app.time, True)   
@@ -700,6 +699,6 @@ class Fruit(worldElement):
 
         #get the center point first
         baseX, baseY = projectionOperationsWithDrag.centerOf4Coords(pt1, pt2, pt3,pt4)
-        canvas.create_rectangle(baseX-2, baseY-12, baseX+2, baseY, fill = "orange") #stem
-        canvas.create_rectangle(baseX-7, baseY-5, baseX+7, baseY+7, fill = "orchid1") #body of fruit
-        canvas.create_rectangle(baseX+1, baseY-9, baseX+5, baseY-6, fill = "springGreen2") 
+        canvas.create_rectangle(baseX-2+app.changeX, baseY-12+app.changeY, baseX+2+app.changeX, baseY+app.changeY, fill = "orange") #stem
+        canvas.create_rectangle(baseX-7+app.changeX, baseY-5+app.changeY, baseX+7+app.changeX, baseY+7+app.changeY, fill = "orchid1") #body of fruit
+        canvas.create_rectangle(baseX+1+app.changeX, baseY-9+app.changeY, baseX+5+app.changeX, baseY-6+app.changeY, fill = "springGreen2") 

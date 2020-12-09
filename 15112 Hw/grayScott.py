@@ -23,11 +23,11 @@ def appStarted(app):
     app.k = 0.117    #kill rate
 
     app.worldElementList = [] #stores all elements present on a board
-    app.biodList = []
+    app.boidList = []
 
     app.mode = "r" #what element they are currently placing
     app.canDirt = False  #keeps track of all the elements that have been unlocked
-    app.canTree = False
+    app.canTree = True
     app.canSeed = False
     app.canFlower = False
     app.canFruit = False
@@ -352,7 +352,7 @@ def rgbString(r, g, b):
     return f'#{r:02x}{g:02x}{b:02x}'
 
 def drawBoids(app, canvas):
-    for boid in app.biodList:
+    for boid in app.boidList:
         x = boid.pos[0]
         y = boid.pos[1]
         canvas.create_oval(x -2, y-2, x+2, y+2)
@@ -478,7 +478,7 @@ def timerFired(app):
 
     if app.drawLine: 
         checkAllElements(app)
-        for boid in app.biodList:
+        for boid in app.boidList:
             boid.move(app)
             boid.wrapAround(app)
 
