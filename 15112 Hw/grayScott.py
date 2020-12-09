@@ -1,7 +1,7 @@
 from cmu_112_graphics import * #graphics package taken from class
 import math, copy, random, projectionOperationsWithDrag, worldElements, BoidTest, DayNight
 #stpres app variables
-def appStarted(app):
+def appStarted(app): 
     app.drawLine = False #dictates whether gray scott phase or world creation phase
     app.rows, app.cols, app.cellSize, app.margin = gameDimensions()
 
@@ -363,7 +363,8 @@ def drawTopButtons(canvas, width, height, number, color):
     canvas.create_rectangle(start, height*5/7, end, height*5/7+30, fill= color)
 
 #creates the grid and the numbers
-def drawBoard(app, canvas):
+def drawBoard(app, canvas): 
+
     if not app.drawLine:
         for row in range(app.rows):
             for col in range(app.cols):
@@ -372,6 +373,7 @@ def drawBoard(app, canvas):
                 color = rgbString(1, int(scaleGreen), int(scaleBlue))
                 x0, y0, x1, y1 = getCellBounds(app, row, col)
                 canvas.create_rectangle(x0,y0, x1, y1, fill = color) 
+        canvas.create_text(400, 50, text = "Click anywhere to diffuse from there, then press \'g\' to build the rest of your world.")
     else:
         DayNight.drawBackGround(canvas, app)
         if app.cloudStart:
@@ -409,10 +411,8 @@ def drawBoard(app, canvas):
             drawTopButtons(canvas, app.width, app.height, 12, "black") #coal 23
         if app.canGold:   
             drawTopButtons(canvas, app.width, app.height, 13, "goldenrod1") #gold 25 
-        # if app.startX != 0:
-        #     canvas.create_text(app.startX, app.startY, text = "start")
-        # if app.endY != 0: 
-        #     canvas.create_text(app.endX, app.endY, text = "end")
+        canvas.create_text(400, 700, text = "Click the buttons to see what they are, and place various items next to each other to see what you get.", fill = "white")
+
 
 #checking surroundings, time of all elements, move animals
 def checkAllElements(app):
@@ -535,7 +535,6 @@ def grayScottyBoy():
 #also starts the simulation
 def main():
     grayScottyBoy()
-    master = Tk()
  
 
 if __name__ == '__main__':
