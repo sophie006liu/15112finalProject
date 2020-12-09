@@ -321,7 +321,7 @@ class Plant(worldElement):
             if lakeCoords in self.coords:
                 self.color = "light sea green"
                 return
-                
+
         for element in app.worldElementList:
             if isinstance(element, Dirt):
                 for dirtPoint in element.coords:
@@ -483,7 +483,7 @@ class Rabbit(worldElement):
             availableCoords = [] 
             for i in range(app.rows - 2):
                 for j in range(app.cols - 2):
-                    if [i,j] in app.lakeRowsAndCols:
+                    if [i,j] in app.lakeRowsAndCols or [i+1,j] in app.lakeRowsAndCols or [i+1,j+1] in app.lakeRowsAndCols or [i,j+1] in app.lakeRowsAndCols:
                         continue
                     else:
                         availableCoords.append((i,j))
