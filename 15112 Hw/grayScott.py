@@ -93,7 +93,7 @@ def mousePressed(app, event):
         coords = (get3DPointsAroundPoint(app, event.x, event.y)) 
         inLake = False
         for lakeCoords in app.lakeRowsAndCols:
-            if lakeCoords in coords: 
+            if coords!= None and lakeCoords in coords: 
                 inLake = True
                 print("clicked ina lake")
 
